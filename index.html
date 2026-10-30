@@ -3152,7 +3152,7 @@ function coachStart(id) {
   if (id === 'm10') S.ui.storageOu = 'ou_root';
   /* 앞 미션에서 걸어 둔 검색어·필터가 남아 있으면 찾을 대상이 숨는다 */
   S.ui.usersQ = ''; S.ui.usersStatus = ''; S.ui.usersPage = 0; SEL.clear();
-  if (id === 'm3') S.ui.usersOu = null;
+  S.ui.usersOu = null;  /* 앞 미션에서 고른 조직 거르기가 남지 않게 */
   if (id === 'm2') $('#topSearch').value = '';
   if (typeof C_Q !== 'undefined') { C_Q = ''; S.ui.chromeTab = 'users'; }
   if (id === 'm10') { S.ui.storageKind = 'ou'; }
@@ -3320,13 +3320,28 @@ async function runMission(id) {
   if (D && D.type === 'mDone') closeDlg();
   return { id, ok, ms: Math.round(performance.now() - t0), log: log.join(' ') };
 }
+/* 안내서 캡처용: 따라하기를 한 단계씩 진행 */
+async function coachStepOnce() {
+  if (!GD) return { active: false };
+  const m = MISSIONS.find(x => x.id === GD.id), st = m.steps[GD.i], before = GD.i;
+  const tgt = coachTarget(st);
+  if (tgt) {
+    const a = st.auto || {};
+    if (a.type != null && /^(INPUT|TEXTAREA)$/.test(tgt.tagName)) { tgt.focus(); tgt.value = a.type; tgt.dispatchEvent(new Event('input', { bubbles: true })); if (a.then) { await tick(); const t2 = $(a.then); if (t2) t2.click(); } }
+    else if (a.select != null && tgt.tagName === 'SELECT') { tgt.value = a.select; tgt.dispatchEvent(new Event('change', { bubbles: true })); }
+    else tgt.click();
+  }
+  for (let k = 0; k < 40; k++) { await tick(); coachCheck(); if (!GD || GD.i !== before) break; await sleep(100); }
+  return { active: !!GD, before, after: GD ? GD.i : -1 };
+}
+function coachInfo() { if (!GD) return { active: false }; const m = MISSIONS.find(x => x.id === GD.id), st = m.steps[GD.i]; coachPaint(); return { active: true, id: GD.id, i: GD.i, n: m.steps.length, t: st.t }; }
 async function runAll(ids = ['m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9', 'm10', 'b1', 'b2', 'b3']) {
   NO_DL = true; window.__res = [];
   for (const id of ids) { const r = await runMission(id); window.__res.push(r); await sleep(50); }
   NO_DL = false;
   return window.__res;
 }
-window.AdminSim = { get S() { return S; }, get D() { return D; }, get GD() { return GD; }, get CD() { return CD; }, get SD() { return SD; }, get ROUTE() { return ROUTE; }, save, reset: resetAll, go, MISSIONS, runMission, runAll, analyzeCsv, makeFakeCsv, effStorageLimit, setNoDownload: v => { NO_DL = !!v; } };
+window.AdminSim = { coachStart, coachStop, coachStepOnce, coachInfo, get S() { return S; }, get D() { return D; }, get GD() { return GD; }, get CD() { return CD; }, get SD() { return SD; }, get ROUTE() { return ROUTE; }, save, reset: resetAll, go, MISSIONS, runMission, runAll, analyzeCsv, makeFakeCsv, effStorageLimit, setNoDownload: v => { NO_DL = !!v; } };
 
 /* ============ 시작 ============ */
 (function boot() {
