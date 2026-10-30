@@ -541,6 +541,10 @@ body.nav-mini .nv .nic{position:static}
 .mpg>.card,.mpg>.note,.mpg>p{margin:16px 24px}
 @media (max-width:599px){.mpg>.card,.mpg>.note,.mpg>p{margin:12px}}
 
+.ougrid{display:grid;grid-template-columns:minmax(220px,320px) minmax(0,1fr)}
+.ougrid-l{border-right:1px solid var(--line);padding:8px 0}
+@container main (max-width:700px){.ougrid{grid-template-columns:minmax(0,1fr)}.ougrid-l{border-right:0;border-bottom:1px solid var(--line)}}
+
 </style>
 </head>
 <body>
@@ -637,7 +641,7 @@ body.nav-mini .nv .nic{position:static}
     <div id="navList"></div>
     <div class="nav-foot">
       <button class="fb tbtn" style="color:var(--fg2);font-weight:400;padding:0" data-act="mock"><svg class="ic"><use href="#i-feedback"/></svg>의견 보내기</button>
-      <span class="sim">연수용 모의 화면입니다. 실제 관리 콘솔과 다를 수 있고, 학교·사용자·개인정보는 모두 가상입니다.<br>제작 송쌤과학 · v2.0</span>
+      <span class="sim">연수용 모의 화면입니다. 실제 관리 콘솔과 다를 수 있고, 학교·사용자·개인정보는 모두 가상입니다.<br>제작 송쌤과학 · v2.1</span>
     </div>
   </nav>
   <div id="navDim" data-act="nav-close"></div>
@@ -906,7 +910,7 @@ function onRoute() {
   closePops();
   if (D && !D.keepOnRoute) closeDlg();
   document.body.classList.remove('nav-open');
-  const ts = $('#topSearch'); if (ts && document.activeElement !== ts) ts.value = '';
+  const ts = $('#topSearch'); if (ts) { ts.value = ''; if (document.activeElement === ts) ts.blur(); $('#topResults').hidden = true; }
   if (typeof resetDrafts === 'function') resetDrafts();
   const pg = PAGES[ROUTE.key];
   for (const id of navAncestors(pg.nav || ROUTE.key)) if (!S.ui.navExp.includes(id)) S.ui.navExp.push(id);
@@ -1290,15 +1294,15 @@ DLG.help = () => ({
   <ul style="margin:0 0 12px;padding-left:20px;line-height:24px">
     <li>디렉터리 › 사용자 — 새 사용자 추가 · 비밀번호 재설정 · 사용자 삭제(데이터 이전) · 복원 · 사용자 일괄 업데이트(CSV)</li>
     <li>디렉터리 › 조직 단위 — 만들기 · 이름 바꾸기 · 삭제</li>
-    <li>기기 › Chrome › 설정 — URL 차단 · 세이프서치 및 YouTube 제한 모드</li>
-    <li>앱 › Google Workspace Marketplace 앱 — Canva 같은 앱 관리자 설치</li>
-    <li>저장용량 — 조직 단위·그룹별 저장용량 한도</li>
+    <li>기기 › Chrome › 설정 — 시크릿 모드 · URL 차단 · 세이프서치 및 제한 모드 · 세이프 브라우징 · SafeSites URL 필터 · (기기 설정) 로그인 제한</li>
+    <li>앱 › Google Workspace Marketplace 앱 — Canva 같은 앱 관리자 설치, 사용자 액세스 변경, 앱 제거</li>
+    <li>저장용량 — 조직 단위·그룹·사용자별 저장용량 한도</li>
   </ul>
   <p>나머지 메뉴는 실물과 비슷하게 보이기만 하는 화면입니다.</p>
   <h3 style="font-size:15px;font-weight:500;margin:16px 0 6px">따라하기</h3>
   <p>오른쪽 <b>실습 미션</b>에서 [따라하기]를 누르면 눌러야 할 곳이 노랗게 반짝이고, 화면 아래 안내 띠에 단계 설명이 나옵니다. 안내 없이 직접 해도 결과가 맞으면 미션이 완료됩니다.</p>
-  <p class="small muted">연수용 보조 기능(가명 자동 채우기, 가명 학생 CSV 만들기, CSV 미리보기)은 실제 콘솔에 없는 기능입니다. 회색 점선 상자로 표시했습니다.</p>
-  <p class="small muted">제작 송쌤과학 · v1.0 · Google 로고와 상표 그림은 쓰지 않았습니다. 앱 이름은 설명을 위해 적은 것이며 해당 회사와 관계가 없습니다.</p>`,
+  <p class="small muted">연수용 보조 기능(가명 자동 채우기, 가명 학생 CSV 만들기, CSV 미리보기)은 실제 콘솔에 없는 기능입니다. 파란 점선 상자로 표시했습니다.</p>
+  <p class="small muted">제작 송쌤과학 · v2.1 · Google 로고와 상표 그림은 쓰지 않았습니다. 앱 이름은 설명을 위해 적은 것이며 해당 회사와 관계가 없습니다.</p>`,
   foot: `<button class="btn btn-outlined" data-act="reset-ask">처음 상태로</button><span class="sp"></span><button class="btn btn-filled" data-act="dlg-close">닫기</button>`
 });
 
@@ -1660,7 +1664,7 @@ DLG.addUser = d => {
       <div class="fp-card"><div class="fh">사용자 정보</div>
         <div class="fb">
           <div class="mrow">${mf('last', '성 *', d.last, '', e.last)}${mf('first', '이름 *', d.first, '', e.first)}</div>
-          <div class="mrow"><div style="display:flex;gap:10px;align-items:flex-start">${`<div style="flex:1">${mf('local', '기본 이메일 *', d.local, '사용자가 로그인 시 사용할 이메일입니다.', e.local)}</div>`}<span style="padding-top:26px;color:#5f6368">@</span></div><div style="padding-top:26px;font-size:15px">${DOMAIN}</div></div>
+          <div class="mrow"><div style="display:flex;gap:12px;align-items:flex-start"><div style="flex:1;min-width:0">${mf('local', '기본 이메일 *', d.local, '사용자가 로그인 시 사용할 이메일입니다.', e.local)}</div><span style="padding-top:26px;white-space:nowrap;font-size:15px"><span style="color:#5f6368">@</span>&nbsp; ${DOMAIN}</span></div><div></div></div>
           <div class="mrow">${mf('recEmail', '보조 이메일', d.recEmail, '사용자에게 최초 로그인에 대한 안내를 전송할 수 있는 이메일(예: 개인 이메일) — 연수에서는 비워 두세요')}${mf('phone', '전화번호', d.phone, '연수에서는 비워 두세요')}</div>
           <button class="explink" data-act="au-exp">사용자의 비밀번호, 조직 단위, 프로필 사진 관리 ${ic(d.exp ? 'chev' : 'chev', 'sm').replace('class="ic sm"', `class="ic sm" style="transform:rotate(${d.exp ? 180 : 0}deg)"`)}</button>
         </div>
@@ -2110,8 +2114,8 @@ PAGES.ous = {
     return crumbs([['조직 단위', null]]) + `<div class="pg">
     <div class="note">${ic('info')}<div>조직 단위는 정책을 다르게 주려는 묶음입니다. 학생·교사를 나눠 두어야 Chrome URL 차단, 저장용량 한도, 앱 설치를 따로 걸 수 있습니다. 하위 조직 단위는 상위 설정을 물려받습니다(상속).</div></div>
     <section class="box"><div class="box-h"><span class="t"><b>조직 단위</b> | ${esc(SCHOOL)}</span><button class="tbtn" data-act="ou-create">${ic('plus', 'sm')}조직 단위 만들기</button></div>
-    <div style="display:grid;grid-template-columns:minmax(220px,320px) minmax(0,1fr)">
-      <div style="border-right:1px solid var(--line);padding:8px 0" data-pick-ctx="ouspage">${ouTreeHTML({ sel: OU_SEL, counts: true })}</div>
+    <div class="ougrid">
+      <div class="ougrid-l" data-pick-ctx="ouspage">${ouTreeHTML({ sel: OU_SEL, counts: true })}</div>
       <div style="padding:18px 24px">
         <div style="display:flex;align-items:flex-start;gap:12px"><div style="flex:1"><div style="font-size:20px">${esc(o.name)}</div><div class="small muted">${esc(ouPath(o.id))}</div></div>
           ${o.parent ? `<button class="ic-btn" data-act="ou-menu" aria-label="조직 단위 메뉴">${ic('more')}</button>` : ''}</div>
@@ -2209,7 +2213,7 @@ const LIVE_SET = {
     def: { safesearch: 'off', yt: 'none' },
     fields: [{ k: 'safesearch', label: 'Google 검색 쿼리용 세이프서치', opts: { off: 'Google 검색 쿼리에 세이프서치를 강제로 사용하지 않음', force: 'Google 검색 쿼리에 항상 세이프서치 사용' } },
       { k: 'yt', label: 'YouTube에 대한 제한 모드', opts: { none: 'YouTube에 제한 모드를 적용하지 않음', moderate: 'YouTube에 최소한 보통 제한 모드 적용', strict: 'YouTube에 엄격한 제한 모드 적용' } }],
-    info: ['Google 검색 결과에서 음란물·노출·잔인한 폭력물 같은 유해 콘텐츠를 걸러 내도록 세이프서치를 강제합니다.', 'YouTube에서 성인용일 수 있는 동영상을 숨기는 제한 모드를 강제합니다. 앱 › 추가 Google 서비스 › YouTube에서도 정할 수 있습니다.'],
+    info: ['Google 검색 결과에서 음란물·노출·잔인한 폭력물 같은 유해 콘텐츠를 걸러 내도록 세이프서치를 강제합니다.', 'YouTube에서 성인용일 수 있는 동영상을 숨기는 제한 모드를 Chrome 브라우저에서 강제합니다. 학교 계정으로 로그인한 사용자의 YouTube 접근 수준(앱 › 추가 Google 서비스 › YouTube › 권한)과는 따로 관리되는 설정이라 둘을 함께 쓰면 좋습니다.'],
     rel: ['URL 차단', 'Chrome 브라우저 사용자가 특정 URL에 액세스하지 못하도록 설정합니다.'] },
   'safebrowsing': { t: '세이프 브라우징 보호 기능', tab: 'users', part: 'sb', kw: '세이프 브라우징 safe browsing 악성코드 피싱',
     def: { level: 'user', override: 'allow' },
@@ -2532,7 +2536,7 @@ DLG.mk = d => {
     page = `<button class="tbtn" data-act="mk-back" style="margin-bottom:16px;padding-left:0">${ic('arrow-l', 'sm')}검색 결과로</button>
       <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">${appTile(a, 80)}<div style="flex:1;min-width:220px"><div style="font-size:28px;line-height:36px">${esc(a.name)}</div><div class="muted">${esc(a.vendor)} · ★${a.rate} · ${a.inst}회 설치</div>
         <div class="small muted" style="margin-top:4px">${esc(a.type)}</div></div>
-        <div style="display:flex;gap:8px">${installed ? '<span class="chip g">관리자가 설치함</span>' : `<button class="btn btn-filled" data-act="admin-install">관리자 설치</button><button class="btn btn-outlined" data-act="self-install">개별 설치</button>`}</div></div>
+        <div style="display:flex;gap:8px">${installed ? '<span class="chip g" style="align-self:center">관리자가 설치함</span>' : ''}<button class="btn btn-filled" data-act="admin-install">관리자 설치</button><button class="btn btn-outlined" data-act="self-install">개별 설치</button></div></div>
       <div class="tabs left" style="margin:20px 0 14px"><button class="tab on">개요</button><button class="tab" data-act="mock">권한</button><button class="tab" data-act="mock">리뷰</button></div>
       <p style="max-width:720px">${esc(a.desc)}</p>
       <div style="font-weight:500;margin:16px 0 8px">이 앱이 요청하는 권한</div><ul class="perm" style="max-width:720px">${a.perms.map(p => `<li>${ic('shield', 'sm')}<span>${esc(p)}</span></li>`).join('')}</ul>
@@ -2542,18 +2546,24 @@ DLG.mk = d => {
       <p>조직의 사용자에게 이 앱을 설치합니다. 사용자는 Google 앱 메뉴나 Drive·Classroom 등에서 바로 앱을 쓸 수 있고, 따로 설치하거나 권한을 승인할 필요가 없습니다.</p>
       <p class="small muted">설치 후 관리 콘솔 › 앱 › Google Workspace Marketplace 앱에서 사용 범위를 바꿀 수 있습니다.</p>`,
       `<button class="btn btn-gray" data-act="mk-cancel">취소</button><button class="btn btn-filled" data-act="mk-continue">계속</button>`);
-    if (d.stage === 'w2') modal = box(`${esc(a.name)}에서 Google 계정에 대한 액세스를 요청합니다`, `<p class="small">관리자 설치를 하면 조직 사용자 대신 아래 권한을 허용하게 됩니다. 학생 개인정보가 어디까지 넘어가는지 꼭 확인하세요.</p>
-      <ul class="perm">${a.perms.map(p => `<li>${ic('shield', 'sm')}<span>${esc(p)}</span></li>`).join('')}</ul>`,
-      `<button class="btn btn-gray" data-act="mk-cancel">취소</button><button class="btn btn-filled" data-act="mk-allow">허용</button>`);
+    /* 실물 순서(Google 도움말 172482): 관리자 설치 → 계속 → 데이터 액세스·약관 검토 → 대상(모든 사용자: 마침 / 특정: 다음 → 고르기 → 선택 → 마침) */
+    if (d.stage === 'w2') modal = box(`${esc(a.name)} 데이터 액세스 검토`, `<p class="small">관리자 설치를 하면 조직 사용자를 대신해 아래 데이터 액세스를 허용하게 됩니다. 앱과 개발자를 믿을 수 있을 때만 허용하세요. 학생 개인정보가 어디까지 넘어가는지 꼭 확인합니다.</p>
+      <ul class="perm">${a.perms.map(p => `<li>${ic('shield', 'sm')}<span>${esc(p)}</span></li>`).join('')}</ul>
+      <label class="check"><input type="checkbox" data-bind="D.agree" ${d.agree ? 'checked' : ''}><span class="small">${esc(a.name)}의 서비스 약관과 개인정보처리방침, Google Workspace Marketplace 서비스 약관을 검토했으며 이에 동의합니다.</span></label>`,
+      `<button class="btn btn-gray" data-act="mk-cancel">취소</button><button class="btn btn-filled ${d.agree ? '' : 'dis'}" data-act="mk-next2">다음</button>`);
     if (d.stage === 'w3') {
-      const set = new Set(d.targets);
-      modal = box(`다음 사용자에게 ${esc(a.name)} 설치`, `
+      const chosen = d.scope === 'specific' && d.targets.length;
+      modal = box(`${esc(a.name)}을(를) 설치할 대상`, `
         <label class="radio"><input type="radio" name="mkScope" value="all" data-bind="D.scope" ${d.scope === 'all' ? 'checked' : ''}>조직의 모든 사용자</label>
-        <label class="radio"><input type="radio" name="mkScope" value="specific" data-bind="D.scope" ${d.scope === 'specific' ? 'checked' : ''}><span>특정 사용자 그룹 또는 조직 단위<span class="sub">예: 학생과 교직원에게만 설치하고 졸업생은 빼기</span></span></label>
-        ${d.scope === 'specific' ? `<div style="margin:2px 0 8px 32px;border:1px solid var(--border);border-radius:8px;padding:6px 0;max-height:220px;overflow:auto" data-pick-ctx="mkscope">${ouTreeHTML({ check: set })}</div>
-          <div class="small" style="margin:0 0 8px 32px">선택됨: ${d.targets.length ? d.targets.map(t => esc(ouLabel(t))).join(', ') : '<span class="muted">없음</span>'}</div>` : ''}
-        <label class="check" style="margin-top:8px"><input type="checkbox" data-bind="D.agree" ${d.agree ? 'checked' : ''}><span class="small">${esc(a.name)}의 서비스 약관과 개인정보처리방침, Google Workspace Marketplace 서비스 약관에 동의합니다.</span></label>`,
-        `<button class="btn btn-gray" data-act="mk-cancel">취소</button><button class="btn btn-filled ${d.agree && (d.scope === 'all' || d.targets.length) ? '' : 'dis'}" data-act="mk-finish">마침</button>`);
+        <label class="radio"><input type="radio" name="mkScope" value="specific" data-bind="D.scope" ${d.scope === 'specific' ? 'checked' : ''}><span>특정 그룹 또는 조직 단위<span class="sub">예: 학생과 교직원에게만 설치하고 졸업생은 빼기</span></span></label>
+        ${chosen ? `<div class="small" style="margin:4px 0 0 32px">선택됨: <b style="font-weight:500">${d.targets.map(t => esc(ouLabel(t))).join(', ')}</b> <button class="tbtn" data-act="mk-next3">변경</button></div>` : ''}`,
+        `<button class="btn btn-gray" data-act="mk-cancel">취소</button>${d.scope === 'specific' && !chosen ? `<button class="btn btn-filled" data-act="mk-next3">다음</button>` : `<button class="btn btn-filled" data-act="mk-finish">마침</button>`}`);
+    }
+    if (d.stage === 'w3pick') {
+      const set = new Set(d.targets);
+      modal = box('조직 단위 또는 그룹 선택', `<div style="border:1px solid var(--border);border-radius:8px;padding:6px 0;max-height:300px;overflow:auto" data-pick-ctx="mkscope">${ouTreeHTML({ check: set })}</div>
+        <p class="small muted" style="margin-top:8px">상위 조직 단위를 고르면 그 아래 조직 단위에도 모두 설치됩니다. 선택됨: ${d.targets.length ? d.targets.map(t => esc(ouLabel(t))).join(', ') : '없음'}</p>`,
+        `<button class="btn btn-gray" data-act="mk-pick-back">뒤로</button><button class="btn btn-filled ${d.targets.length ? '' : 'dis'}" data-act="mk-select">선택</button>`);
     }
     if (d.stage === 'done') modal = box(`${esc(a.name)}이(가) 설치되었습니다`, `<div class="done-mark">${ic('check')}</div>
       <p style="text-align:center">변경사항이 적용되는 데 최대 24시간이 소요될 수 있지만 일반적으로 더 빨리 적용됩니다.</p>
@@ -2579,7 +2589,8 @@ ONBIND.D = (key, el, ev) => {
       if (g) g.innerHTML = mkGridHTML(MK_APPS.filter(x => (!q || (x.name + ' ' + x.vendor).toLowerCase().includes(q)) && (!D.cat || x.cat === D.cat)));
       sig('mk-search', D.q); return;
     }
-    if (key === 'agree' || key === 'scope') { drawDlg(); return; }
+    if (key === 'agree') { drawDlg(); return; }
+    if (key === 'scope') { if (D.scope === 'all') D.targets = []; drawDlg(); return; }
   }
   if (D && D.type === 'mkScope' && key === 'scope') { drawDlg(); return; }
   _onbindD(key, el, ev);
@@ -2592,14 +2603,16 @@ ACT['mk-cancel'] = () => { D.stage = 'detail'; D.agree = false; drawDlg(); };
 ACT['self-install'] = () => toast('개별 설치는 관리자 본인 계정에만 설치됩니다. 학교 전체에 배포하려면 [관리자 설치]를 쓰세요.');
 ACT['admin-install'] = () => { D.stage = 'w1'; drawDlg(); sig('mk-stage', 'w1'); };
 ACT['mk-continue'] = () => { D.stage = 'w2'; drawDlg(); sig('mk-stage', 'w2'); };
-ACT['mk-allow'] = () => { D.stage = 'w3'; D.scope = 'all'; drawDlg(); sig('mk-stage', 'w3'); };
+ACT['mk-next2'] = () => { if (!D.agree) { toast('약관과 데이터 액세스를 검토하고 동의해야 다음으로 갈 수 있습니다.'); return; } D.stage = 'w3'; D.scope = 'all'; D.targets = []; drawDlg(); sig('mk-stage', 'w3'); };
+ACT['mk-next3'] = () => { D.stage = 'w3pick'; drawDlg(); sig('mk-stage', 'w3pick'); };
+ACT['mk-pick-back'] = () => { D.stage = 'w3'; drawDlg(); };
+ACT['mk-select'] = () => { if (!D.targets.length) { toast('조직 단위를 하나 이상 고르세요.'); return; } D.stage = 'w3'; drawDlg(); sig('mk-stage', 'w3-selected'); };
 PICK.mkscope = id => {
   const i = D.targets.indexOf(id);
   i >= 0 ? D.targets.splice(i, 1) : D.targets.push(id);
   drawDlg(); sig('mk-target', id);
 };
 ACT['mk-finish'] = () => {
-  if (!D.agree) { toast('약관에 동의해야 설치할 수 있습니다.'); return; }
   if (D.scope === 'specific' && !D.targets.length) { toast('조직 단위를 하나 이상 고르세요.'); return; }
   const a = MK_APPS_BY_ID[D.app];
   const scope = D.scope === 'all' ? { type: 'all', targets: [] } : { type: 'ou', targets: D.targets.slice() };
@@ -2619,10 +2632,13 @@ PAGES['apps-additional'] = {
     const svcs = ['YouTube', 'Google 지도', 'Google Play', '블로거', 'Google 번역', 'Google 어스', 'Google 사진', 'Google 그룹스'];
     let detail = '';
     if (ADD_SEL === 'YouTube') {
-      const rows = S.ous.map(o => { const v = chromeEff(o.id, 'safe'); return `<tr><td style="padding-left:${20 + (ouChain(o.id).length - 1) * 16}px">${esc(o.name)}</td><td>${YT_TXT[v.v.yt]}</td><td class="muted">${v.from ? (v.from === o.id ? '로컬에서 적용됨' : `'${esc(ouLabel(v.from))}'에서 상속됨`) : 'Google 기본값'}</td></tr>`; }).join('');
-      detail = `<section class="box" style="margin-top:16px"><div class="box-h"><span class="t"><b>YouTube</b> › 콘텐츠 설정 › 제한 모드</span><button class="ic-btn sm" data-act="add-close" aria-label="닫기">${ic('close', 'sm')}</button></div>
-        <p class="small" style="padding:12px 20px 0;margin:0">조직 단위별 YouTube 제한 모드입니다. 이 실습판에서는 <a href="#/chrome-setting/safesearch" data-go="chrome-setting" data-param="safesearch">기기 › Chrome › 설정 › 세이프서치 및 제한 모드</a>와 같은 값을 읽기 전용으로 보여 줍니다.</p>
-        <div class="tbl-wrap"><table class="tbl"><thead><tr><th style="padding-left:20px">조직 단위</th><th>제한 모드</th><th>적용</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
+      const rows = S.ous.map(o => { const v = chromeEff(o.id, 'safe'); return `<tr><td style="padding-left:${20 + (ouChain(o.id).length - 1) * 16}px">${esc(o.name)}</td><td class="muted">${YT_TXT[v.v.yt]}</td></tr>`; }).join('');
+      detail = `<section class="box" style="margin-top:16px"><div class="box-h"><span class="t"><b>YouTube</b> › 권한(보기용)</span><button class="ic-btn sm" data-act="add-close" aria-label="닫기">${ic('close', 'sm')}</button></div>
+        <div style="padding:14px 20px">
+          <div class="note">${ic('info')}<div>YouTube 제한은 두 곳에서 <b>따로</b> 관리합니다. ① 여기(앱 › 추가 Google 서비스 › YouTube › 권한)는 학교 계정으로 로그인한 사용자의 <b>YouTube 접근 수준</b>(엄격한 제한·보통 제한·제한 없음)을 정합니다. ② <a href="#/chrome-setting/safesearch" data-go="chrome-setting" data-param="safesearch">기기 › Chrome › 설정 › 세이프서치 및 제한 모드</a>는 학생 Chrome 브라우저에서 <b>YouTube 제한 모드</b>를 강제합니다. 이 실습판은 ②를 실습합니다.</div></div>
+          <dl class="kv"><dt>YouTube 액세스 제한</dt><dd>제한 없는 YouTube 액세스(모의 값 — 이 화면은 보기용)</dd><dt>동영상 승인</dt><dd>교사가 동영상을 승인할 수 있음(모의 값)</dd></dl></div>
+        <div class="box-h" style="border-top:1px solid var(--line)"><span class="t">참고: 조직 단위별 Chrome 「YouTube 제한 모드」(②, 실습 결과)</span></div>
+        <div class="tbl-wrap"><table class="tbl"><thead><tr><th style="padding-left:20px">조직 단위</th><th>Chrome YouTube 제한 모드</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
     }
     return crumbs([['앱', 'apps'], ['추가 Google 서비스', null]]) + `<div class="pg">
     <section class="box"><div class="box-h"><span class="t"><b>추가 Google 서비스</b> | 모든 조직 단위의 사용자용 서비스 표시 중</span></div>
@@ -2846,7 +2862,7 @@ const dlgIs = t => !!(D && D.type === t);
 const since = (ev, t0, pred) => S.audit.some(a => a.event === ev && a.t >= t0 && (!pred || pred(a)));
 const stuLocal = part => (S.chrome.byOu.ou_stu || {})[part];
 const onDetail = k => ROUTE.key === 'chrome-setting' && ROUTE.param === k;
-const ouStuStep = { sel: '#main .lp [data-ou-pick="ou_stu"]', t: '조직 단위 「학생」 고르기', d: '왼쪽 「조직 단위」에서 학생을 고릅니다. 최상위(학교)에 걸면 교사도 막히므로, 학생에게만 적용하려면 학생 조직 단위를 먼저 고릅니다.', done: () => S.ui.chromeOu === 'ou_stu' };
+const ouStuStep = { sel: ['#main .lp [data-ou-pick="ou_stu"]', '#main [data-act="lp-sec"][data-sec="ous"]'], t: '조직 단위 「학생」 고르기', d: '왼쪽 「조직 단위」(접혀 있으면 눌러 펼침)에서 학생을 고릅니다. 최상위(학교)에 걸면 교사도 막히므로, 학생에게만 적용하려면 학생 조직 단위를 먼저 고릅니다.', done: () => S.ui.chromeOu === 'ou_stu' };
 const MISSIONS = [
   { id: 'm1', grp: 'acct', n: '새 학생 계정 만들기(가명)', min: 4, d: '1학년 학생 한 명을 가명으로 만들고, 학교가 정한 초기 비밀번호를 준 뒤 처음 로그인할 때 바꾸게 합니다.',
     check: () => S.users.some(u => u.createdBy === 'manual' && u.ou === 'ou_g1' && u.status !== 'deleted'),
@@ -2856,7 +2872,7 @@ const MISSIONS = [
       { in: 'addUser', sel: '[data-act="fill-fake-student"]', t: '학생 가명 채우기', d: '실제 이름 대신 가명으로 성·이름·기본 이메일(학번)을 채웁니다. 직접 입력해도 됩니다. (연수용 보조 — 실제 콘솔엔 없음)', done: () => D.first.trim() && D.last.trim() && D.local.trim() },
       { in: 'addUser', sel: '[data-act="au-exp"]', t: '「비밀번호, 조직 단위…관리」 펼치기', d: '파란 글씨 링크를 눌러 조직 단위와 비밀번호 칸을 엽니다.', done: () => D.exp },
       { in: 'addUser', sel: '[data-act="pick-ou"]', t: '조직 단위 연필(✎) 누르기', d: '처음에는 학교(최상위)로 되어 있습니다. 학생용 정책이 적용되도록 바꿉니다.', done: () => D.ouOpen || D.ou === 'ou_g1' },
-      { in: 'addUser', sel: '#dlgOuPick [data-ou-pick="ou_g1"]', t: '학생 › 「1학년」 고르기', d: '조직 단위 선택 창에서 1학년을 누릅니다.', done: () => D.ouTmp === 'ou_g1' || (D.ou === 'ou_g1' && !D.ouOpen) },
+      { in: 'addUser', sel: ['#dlgOuPick [data-ou-pick="ou_g1"]', '[data-act="pick-ou"]'], t: '학생 › 「1학년」 고르기', d: '조직 단위 선택 창에서 1학년을 누릅니다.', done: () => D.ouTmp === 'ou_g1' || (D.ou === 'ou_g1' && !D.ouOpen), fail: '다른 조직 단위를 골랐어요. 연필(✎)을 다시 눌러 학생 › 1학년으로 골라 주세요.', failOn: 'ou-pick' },
       { in: 'addUser', sel: '[data-act="ou-pick-done"]', t: '「완료」 누르기', d: '학번 이메일도 1학년에 맞게 다시 매겨집니다.', done: () => D.ou === 'ou_g1' && !D.ouOpen, fail: '조직 단위를 학생 › 1학년으로 골라 주세요.', failOn: 'ou-pick' },
       { in: 'addUser', sel: '#dlgAddUser [data-bind="D.pwMode"][value="custom"]', t: '「비밀번호 생성」 고르기', d: '학교가 정한 초기 비밀번호를 줄 때 씁니다. (자동 생성을 고르면 16자 비밀번호가 만들어집니다.)', done: () => D.pwMode === 'custom' },
       { in: 'addUser', sel: '#dlgAddUser [data-bind="D.pw"]', t: '연습용 비밀번호 입력(8자 이상)', d: '예: Practice2026! — 실제로 쓰는 비밀번호는 넣지 마세요.', done: () => (D.pw || '').length >= 8, auto: { type: 'Practice2026!' } },
@@ -2931,7 +2947,7 @@ const MISSIONS = [
       { sel: '[data-act="cset-open"][data-set="safesearch"]', t: '「세이프서치 및 제한 모드」 행 누르기', d: '콘텐츠 섹션에 있습니다.', done: () => onDetail('safesearch'), setsPg: true },
       { sel: '[data-field="safesearch"]', t: '「Google 검색 쿼리에 항상 세이프서치 사용」', d: '검색 결과에서 음란물·폭력물이 걸러집니다.', done: () => !!(CD && CD.safesearch === 'force'), auto: { select: 'force' } },
       { sel: '[data-field="yt"]', t: '「YouTube에 엄격한 제한 모드 적용」', d: '「최소한 보통 제한 모드」도 됩니다. 학생용은 엄격 모드를 많이 씁니다.', done: () => !!(CD && CD.yt !== 'none'), auto: { select: 'strict' } },
-      { sel: '[data-act="save-chrome"]', t: '「저장」 누르기', d: '앱 › 추가 Google 서비스 › YouTube에서도 같은 값이 보입니다.', done: () => { const c = stuLocal('safe') || {}; return c.safesearch === 'force' && c.yt && c.yt !== 'none'; } }
+      { sel: '[data-act="save-chrome"]', t: '「저장」 누르기', d: 'Chrome에서 YouTube를 볼 때 제한 모드가 강제됩니다. 계정 단위 YouTube 접근 수준은 앱 › 추가 Google 서비스 › YouTube에서 따로 정합니다.', done: () => { const c = stuLocal('safe') || {}; return c.safesearch === 'force' && c.yt && c.yt !== 'none'; } }
     ] },
   { id: 'm8', grp: 'web', n: '세이프 브라우징 강화 + SafeSites 확인', min: 3, d: '악성코드·피싱을 막는 세이프 브라우징을 강화 모드로 고정하고, 성인용 사이트를 거르는 SafeSites 필터가 켜져 있는지 확인합니다.',
     check: () => { const c = stuLocal('sb') || {}; return c.level === 'enhanced' && c.override === 'deny' && !!S.flags.sitesSeen; },
@@ -2955,13 +2971,15 @@ const MISSIONS = [
       { in: 'mk', sel: '#mkSearch', t: '「Canva」 검색', d: '앱 이름으로 찾습니다.', done: () => /canva/i.test(D.q || '') || D.stage !== 'browse', auto: { type: 'Canva' } },
       { in: 'mk', sel: '[data-act="mk-open"][data-app="canva"]', t: 'Canva 카드 누르기', d: '앱 소개와 요청 권한을 먼저 봅니다.', done: () => D.app === 'canva' && D.stage !== 'browse' },
       { in: 'mk', sel: '[data-act="admin-install"]', t: '「관리자 설치」 누르기', d: '「개별 설치」는 관리자 한 사람에게만 설치됩니다.', done: () => ['w1', 'w2', 'w3', 'done'].includes(D.stage) },
-      { in: 'mk', sel: '[data-act="mk-continue"]', t: '「계속」 누르기', d: '', done: () => ['w2', 'w3', 'done'].includes(D.stage) },
-      { in: 'mk', sel: '[data-act="mk-allow"]', t: '권한 확인 후 「허용」', d: '학생 정보가 어디까지 넘어가는지 꼭 읽어 봅니다.', done: () => ['w3', 'done'].includes(D.stage) },
-      { in: 'mk', sel: '#mkModal [data-bind="D.scope"][value="specific"]', t: '「특정 사용자 그룹 또는 조직 단위」', d: '졸업생 계정에는 설치하지 않으려고 범위를 좁힙니다.', done: () => D.scope === 'specific' || D.stage === 'done' },
+      { in: 'mk', sel: '[data-act="mk-continue"]', t: '「계속」 누르기', d: '', done: () => ['w2', 'w3', 'w3pick', 'done'].includes(D.stage) },
+      { in: 'mk', sel: '#mkModal [data-bind="D.agree"]', t: '데이터 액세스·약관 검토 후 동의', d: '학생 정보가 어디까지 넘어가는지 꼭 읽어 봅니다. 앱과 개발자를 믿을 수 있을 때만 허용합니다.', done: () => D.agree || ['w3', 'w3pick', 'done'].includes(D.stage) },
+      { in: 'mk', sel: '[data-act="mk-next2"]', t: '「다음」 누르기', d: '설치 대상을 고르는 단계입니다.', done: () => ['w3', 'w3pick', 'done'].includes(D.stage) },
+      { in: 'mk', sel: '#mkModal [data-bind="D.scope"][value="specific"]', t: '「특정 그룹 또는 조직 단위」', d: '졸업생 계정에는 설치하지 않으려고 범위를 좁힙니다. (모든 사용자면 바로 「마침」)', done: () => D.scope === 'specific' || ['w3pick', 'done'].includes(D.stage) },
+      { in: 'mk', sel: '[data-act="mk-next3"]', t: '「다음」 누르기', d: '조직 단위 나무가 나옵니다.', done: () => D.stage === 'w3pick' || D.targets.length || D.stage === 'done' },
       { in: 'mk', sel: '#mkModal [data-ou-pick="ou_stu"]', t: '「학생」 체크', d: '학생 아래 1~3학년에 모두 설치됩니다.', done: () => D.targets.includes('ou_stu') || D.stage === 'done' },
       { in: 'mk', sel: '#mkModal [data-ou-pick="ou_staff"]', t: '「교직원」 체크', d: '교사·행정실에 함께 설치됩니다.', done: () => D.targets.includes('ou_staff') || D.stage === 'done' },
-      { in: 'mk', sel: '#mkModal [data-bind="D.agree"]', t: '약관 동의 체크', d: '', done: () => D.agree || D.stage === 'done' },
-      { in: 'mk', sel: '[data-act="mk-finish"]', t: '「마침」 누르기', d: '', done: () => { const a = S.apps.marketplace.find(x => x.id === 'canva' && x.installed); return !!(a && a.scope.targets.includes('ou_stu') && a.scope.targets.includes('ou_staff')); } },
+      { in: 'mk', sel: '[data-act="mk-select"]', t: '「선택」 누르기', d: '', done: () => (D.stage === 'w3' && D.targets.length > 0) || D.stage === 'done' },
+      { in: 'mk', sel: '[data-act="mk-finish"]', t: '「마침」 누르기', d: '', done: () => { const a = S.apps.marketplace.find(x => x.id === 'canva' && x.installed); return !!(a && a.installedAt >= GD.t0 && a.scope.targets.includes('ou_stu') && a.scope.targets.includes('ou_staff')); } },
       { in: 'mk', final: true, sel: '[data-act="mk-done"]', t: '「완료」 누르기', d: '앱 목록에서 Canva를 눌러 「사용자 액세스」를 확인해 보세요.', sig: 'mk-done' }
     ] },
   { id: 'm10', grp: 'app', n: '학생 저장용량 한도 10 GB', min: 2, d: '학생 조직 단위의 사용자 저장용량 한도를 10 GB로 정합니다.',
@@ -2969,13 +2987,13 @@ const MISSIONS = [
     steps: [
       { go: 'storage', t: '[저장용량] 열기', d: '왼쪽 메뉴 맨 아래 「저장용량」입니다. 학교 전체 사용량을 먼저 봅니다.' },
       { sel: '[data-act="storage-manage"]', t: '저장용량 설정 「관리」', d: '조직 단위·그룹·사용자별 한도를 정하는 화면입니다.', done: () => ROUTE.key === 'storage-settings', setsPg: true },
-      { sel: '#main .lp [data-ou-pick="ou_stu"]', t: '조직 단위 「학생」 고르기', d: '1~3학년이 함께 적용받습니다.', done: () => { const t = stTarget(); return t.kind === 'ou' && t.id === 'ou_stu'; } },
+      { sel: ['#main .lp [data-ou-pick="ou_stu"]', '#main [data-act="lp-sec"][data-sec="ous"]'], t: '조직 단위 「학생」 고르기', d: '왼쪽 「조직 단위」(접혀 있으면 눌러 펼침)에서 학생을 고릅니다. 1~3학년이 함께 적용받습니다.', done: () => { const t = stTarget(); return t.kind === 'ou' && t.id === 'ou_stu'; } },
       { sel: '[data-row="user-limit"]', t: '「사용자 저장용량 한도」 행 누르기', d: '행을 누르면 편집 칸이 열립니다.', done: () => !!(SD && SD.editing) },
       { sel: '[data-bind="SD.mode"][value="on"]', t: '「사용」 고르기', d: '', done: () => !!(SD && SD.mode === 'on') },
       { sel: '[data-field="limit-value"]', t: '저장용량 한도 10, 단위 GB', d: '숫자 칸에 10, 단위는 GB 그대로 둡니다.', done: () => !!(SD && +SD.value === 10 && SD.unit === 'GB'), fail: '10 GB로 맞춰 주세요.', failOn: 'save-storage-try', auto: { type: '10' } },
       { sel: '[data-act="save-storage"]', t: '「재정의」 누르기', d: '저장 뒤 아래 「적용 확인」 표에서 학생들의 한도를 확인하세요.', done: () => { const l = S.storage.byOu.ou_stu && S.storage.byOu.ou_stu.limit; return !!(l && l.value === 10 && l.unit === 'GB'); } }
     ] },
-  { id: 'b1', bonus: true, after: 'm3', n: '삭제한 사용자 복원', min: 2, d: '실수로 지운 계정을 「최근 삭제된 사용자」에서 되살립니다(20일 이내).',
+  { id: 'b1', bonus: true, after: 'm3', preAlways: true, n: '삭제한 사용자 복원', min: 2, d: '실수로 지운 계정을 「최근 삭제된 사용자」에서 되살립니다(20일 이내).',
     pre: () => { const u = userById('u_t112'); return u && u.status === 'deleted' ? '' : '한은빈(t112) 선생님이 삭제된 상태가 아닙니다. 미션 3을 먼저 하세요.'; },
     check: () => S.audit.some(a => a.event === 'user_restore'),
     steps: [
@@ -3015,6 +3033,15 @@ const GROUPS = {
   app: ['앱·저장용량', '']
 };
 const MAIN_MISSIONS = MISSIONS.filter(m => !m.bonus);
+const stuDel = part => { const c = S.chrome.byOu.ou_stu; if (c) { delete c[part]; if (!Object.keys(c).length) delete S.chrome.byOu.ou_stu; } };
+const REPLAY_RESET = {
+  m3: () => { const u = userById('u_t112'); if (u && u.status === 'deleted') { u.status = 'active'; u.deletedAt = null; u.transfer = null; u.ou = 'ou_teach'; } },
+  m5: () => stuDel('incog'), m6: () => stuDel('url'), m7: () => stuDel('safe'),
+  m8: () => { stuDel('sb'); S.flags.sitesSeen = false; },
+  m9: () => { S.apps.marketplace = S.apps.marketplace.filter(a => a.id !== 'canva'); },
+  m10: () => { delete S.storage.byOu.ou_stu; },
+  b3: () => stuDel('login')
+};
 function curMainMission() { return MAIN_MISSIONS.find(m => !S.mission.done[m.id]) || null; }
 function missionUnlocked(m) {
   if (S.mission.done[m.id]) return true;
@@ -3113,11 +3140,16 @@ ACT['coach-skip'] = () => {
 function coachStart(id) {
   const m = MISSIONS.find(x => x.id === id); if (!m) return;
   if (!missionUnlocked(m)) { toast('앞 미션을 먼저 마쳐 주세요.', 'no'); return; }
-  const pre = m.pre && !S.mission.done[m.id] ? m.pre() : '';
+  const pre = m.pre && (!S.mission.done[m.id] || m.preAlways) ? m.pre() : '';
   if (pre) { toast(pre, 'no'); return; }
   closeDlg(); closePops();
   if (!$('#tasksDrawer').hidden && m.id !== 'b2') $('#tasksDrawer').hidden = true;
   GD = { id, i: 0, t0: now(), stepT: now(), replay: !!S.mission.done[id], fail: '', seen: null };
+  /* 복습: 이전 실습 결과가 남아 있으면 단계가 저절로 넘어가므로 이 미션의 결과만 지운다 */
+  if (GD.replay && REPLAY_RESET[id]) { REPLAY_RESET[id](); toast(`복습을 위해 「${m.n}」의 이전 결과를 지웠습니다.`); }
+  /* 실물처럼 매번 처음(최상위)에서 조직 단위를 고르게 */
+  if (m.grp === 'web' || id === 'b3') S.ui.chromeOu = 'ou_root';
+  if (id === 'm10') S.ui.storageOu = 'ou_root';
   /* 앞 미션에서 걸어 둔 검색어·필터가 남아 있으면 찾을 대상이 숨는다 */
   S.ui.usersQ = ''; S.ui.usersStatus = ''; S.ui.usersPage = 0; SEL.clear();
   if (id === 'm3') S.ui.usersOu = null;
@@ -3294,7 +3326,7 @@ async function runAll(ids = ['m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9
   NO_DL = false;
   return window.__res;
 }
-window.AdminSim = { get S() { return S; }, save, reset: resetAll, go, MISSIONS, runMission, runAll, analyzeCsv, makeFakeCsv, setNoDownload: v => { NO_DL = !!v; } };
+window.AdminSim = { get S() { return S; }, get D() { return D; }, get GD() { return GD; }, get CD() { return CD; }, get SD() { return SD; }, get ROUTE() { return ROUTE; }, save, reset: resetAll, go, MISSIONS, runMission, runAll, analyzeCsv, makeFakeCsv, effStorageLimit, setNoDownload: v => { NO_DL = !!v; } };
 
 /* ============ 시작 ============ */
 (function boot() {
