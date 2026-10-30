@@ -672,6 +672,7 @@ const KEY = 'ssam_gadmin_sim_v2';
 const DOMAIN = 'dtutor.example';
 const SCHOOL = '디지털튜터학교';
 const ADMIN = 'admin@' + DOMAIN;
+const GUIDE_PDF = 'https://songsamscience.github.io/admin-simulator/guide.pdf';  /* 실습 방법 안내 PDF(게시본) */
 const DAY = 86400000;
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
@@ -1214,6 +1215,7 @@ ACT['avatar'] = el => popMenu(el, `<div style="padding:16px 20px;text-align:cent
     <div class="small muted">${ADMIN}</div></div><hr>
   <button class="mi" data-act="help">${ic('help')}이 실습판 안내</button>
   <button class="mi" data-act="mp-open">${ic('flag')}실습 미션 열기</button>
+  <a class="mi" href="${GUIDE_PDF}" target="_blank" rel="noopener" style="text-decoration:none">${ic('file')}실습 방법 안내(PDF)</a>
   <button class="mi" data-act="reset-ask">${ic('restore')}처음 상태로</button>
   <button class="mi" data-act="logout">${ic('logout')}로그아웃</button>`);
 ACT['logout'] = () => toast('모의 화면이라 로그아웃이 없습니다. 실제 콘솔에서는 오른쪽 위 프로필에서 로그아웃합니다.');
@@ -1299,6 +1301,7 @@ DLG.help = () => ({
     <li>저장용량 — 조직 단위·그룹·사용자별 저장용량 한도</li>
   </ul>
   <p>나머지 메뉴는 실물과 비슷하게 보이기만 하는 화면입니다.</p>
+  <p><a href="${GUIDE_PDF}" target="_blank" rel="noopener" style="font-weight:500">${ic('file', 'sm')} 실습 방법 안내 PDF 내려받기</a> — 미션 13개를 단계마다 화면 그림과 함께 정리했습니다(74쪽).</p>
   <h3 style="font-size:15px;font-weight:500;margin:16px 0 6px">따라하기</h3>
   <p>오른쪽 <b>실습 미션</b>에서 [따라하기]를 누르면 눌러야 할 곳이 노랗게 반짝이고, 화면 아래 안내 띠에 단계 설명이 나옵니다. 안내 없이 직접 해도 결과가 맞으면 미션이 완료됩니다.</p>
   <p class="small muted">연수용 보조 기능(가명 자동 채우기, 가명 학생 CSV 만들기, CSV 미리보기)은 실제 콘솔에 없는 기능입니다. 파란 점선 상자로 표시했습니다.</p>
@@ -1312,7 +1315,7 @@ PAGES.home = {
   render() {
     const n = activeUsers().length;
     const used = S.storage.used, tot = used.driveTB + used.gmailTB + used.photosTB;
-    const hc = (t, s, right, body = '', links = []) => `<div class="hcard"><div class="hh"><div><div class="ht">${esc(t)}</div><div class="hs">${esc(s)}</div></div>${right ? `<a class="hl" href="#/${right[1]}" data-go="${right[1]}">${esc(right[0])}</a>` : ''}</div>${body}${links.length ? `<div class="links">${links.map(l => l[1] ? `<a href="#/${l[1]}" ${l[2] ? `data-act="${l[2]}"` : `data-go="${l[1]}"`}>${esc(l[0])}</a>` : `<button data-act="mock">${esc(l[0])}</button>`).join('')}</div>` : ''}</div>`;
+    const hc = (t, s, right, body = '', links = []) => `<div class="hcard"><div class="hh"><div><div class="ht">${esc(t)}</div><div class="hs">${esc(s)}</div></div>${right ? `<a class="hl" href="#/${right[1]}" data-go="${right[1]}">${esc(right[0])}</a>` : ''}</div>${body}${links.length ? `<div class="links">${links.map(l => l[3] ? `<a href="${l[3]}" target="_blank" rel="noopener">${esc(l[0])}</a>` : l[1] ? `<a href="#/${l[1]}" ${l[2] ? `data-act="${l[2]}"` : `data-go="${l[1]}"`}>${esc(l[0])}</a>` : `<button data-act="mock">${esc(l[0])}</button>`).join('')}</div>` : ''}</div>`;
     return `<div class="hgrid">
       ${hc('사용자', '사용자 추가 또는 관리', ['모두 보기', 'users'], `<div class="small muted" style="margin-top:10px">사용자 ${n}명</div>`, [['사용자 추가', 'users', 'home-add-user'], ['사용자 삭제', 'users'], ['사용자 이름 또는 이메일 업데이트', 'users'], ['보조 이메일 주소 만들기']])}
       ${hc('앱 액세스 제어', '만 18세 미만으로 지정된 사용자가 요청한 앱 검토', null, `<div style="display:flex;gap:40px;margin-top:14px"><div><div class="small muted">검토 대기 중인 앱</div><div style="font-size:22px">0</div></div><div><div class="small muted">사용자 요청</div><div style="font-size:22px">0</div></div></div>`, [['앱 검토']])}
@@ -1331,7 +1334,7 @@ PAGES.home = {
       ${hc('건물 및 리소스', '건물, 회의실, 리소스 관리 및 모니터링', null)}
       ${hc('규칙', '규칙 관리를 통해 알림 및 작업 설정', null)}
       ${hc('관리자 역할', '관리 콘솔에 대한 권한을 관리하는 역할 할당', null, '', [['관리자 역할', 'roles']])}
-      ${hc('연수 도구', '체험용 Admin 실습 사이트 · 제작 송쌤과학', null, '<div class="small muted" style="margin-top:12px;line-height:18px">실습 미션을 따라 하며 관리 콘솔 사용법을 익힙니다. 모든 사용자·개인정보는 가상입니다.</div>', [['실습 미션 열기', null]])}
+      ${hc('연수 도구', '체험용 Admin 실습 사이트 · 제작 송쌤과학', null, '<div class="small muted" style="margin-top:12px;line-height:18px">실습 미션을 따라 하며 관리 콘솔 사용법을 익힙니다. 모든 사용자·개인정보는 가상입니다.</div>', [['실습 미션 열기', null], ['실습 방법 안내 PDF', null, null, GUIDE_PDF]])}
     </div>`;
   },
   after() { const b = $$('.hcard .links button').find(x => x.textContent === '실습 미션 열기'); if (b) b.setAttribute('data-act', 'mp-open'); }
@@ -3086,7 +3089,7 @@ function renderMp() {
       ${MAIN_MISSIONS.map((m, i) => (i === 0 || MAIN_MISSIONS[i - 1].grp !== m.grp ? `<div style="margin:${i ? 16 : 2}px 2px 8px"><b style="font-size:13px;font-weight:500">${esc(GROUPS[m.grp][0])}</b>${GROUPS[m.grp][1] ? `<div class="small muted" style="margin-top:3px;line-height:16px">${esc(GROUPS[m.grp][1])}</div>` : ''}</div>` : '') + card(m, i)).join('')}
       <div class="small muted" style="margin:14px 2px 8px">보너스 미션</div>
       ${MISSIONS.filter(m => m.bonus).map(m => card(m, 0)).join('')}</div>
-    <div class="mp-f"><button class="btn btn-outlined btn-sm" data-act="save-png">${ic('camera', 'sm')}진행 상황 저장(PNG)</button><button class="btn btn-text btn-sm" data-act="reset-ask" id="mpReset">처음 상태로</button></div>`;
+    <div class="mp-f"><a class="btn btn-text btn-sm" style="flex-basis:100%;justify-content:center" href="${GUIDE_PDF}" target="_blank" rel="noopener">${ic('file', 'sm')}실습 방법 안내 PDF</a><button class="btn btn-outlined btn-sm" data-act="save-png">${ic('camera', 'sm')}진행 상황 저장(PNG)</button><button class="btn btn-text btn-sm" data-act="reset-ask" id="mpReset">처음 상태로</button></div>`;
   const ml = $('#mp .mp-list'); if (ml) ml.scrollTop = sc;
 }
 ACT['mp-open'] = () => { S.ui.mpOpen = true; save(); renderMp(); };

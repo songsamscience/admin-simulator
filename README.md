@@ -3,6 +3,7 @@
 학교 관리자 선생님 연수용으로 만든 **관리 콘솔 모의 체험 사이트**입니다. 제작: 송쌤과학
 
 - 바로 열기: https://songsamscience.github.io/admin-simulator/
+- 실습 방법 안내(PDF, 74쪽): https://songsamscience.github.io/admin-simulator/guide.pdf — 미션 13개를 단계마다 화면 그림과 함께 정리
 - 연수용 모의 화면이라 **실제 관리 콘솔과 화면·문구·동작이 다를 수 있습니다.**
 - 학교명(디지털튜터학교)·도메인(dtutor.example, 예시용 예약 도메인)·사용자 이름·학번·비밀번호 등 **모든 개인정보는 가상**입니다.
 - 실제 Google 계정과 연결되지 않으며, 입력한 내용은 쓰는 사람의 브라우저(localStorage)에만 저장됩니다. 실제 비밀번호나 학생 정보를 입력하지 마세요.
