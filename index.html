@@ -469,18 +469,26 @@ td.c-acts{padding:0 !important}
 /* ===== 코치 ===== */
 .gd-hl{outline:3px solid #fbbc04 !important;outline-offset:2px;animation:gdPulse 1.2s ease-in-out infinite;border-radius:6px}
 @keyframes gdPulse{0%,100%{box-shadow:0 0 0 2px rgba(251,188,4,.55)}50%{box-shadow:0 0 0 9px rgba(251,188,4,0)}}
-#guideBar{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);width:min(600px,calc(100vw - 32px));background:#202124;color:#fff;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.35);z-index:110;padding:12px 12px 12px 16px;display:flex;gap:12px;align-items:flex-start}
+/* 안내 띠 — --z(축소·확대 배율)로 글자·단추 크기를 함께 바꾼다. .free = 끌어서 옮긴 자리(left/top은 스크립트가 넣음) */
+#guideBar{--z:1;position:fixed;left:50%;bottom:20px;transform:translateX(-50%);width:min(calc(600px * var(--z)),calc(100vw - 32px));background:#202124;color:#fff;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.35);z-index:110;padding:18px 12px 12px 16px;display:flex;gap:12px;align-items:flex-start;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+#guideBar::before{content:'';position:absolute;top:7px;left:50%;width:40px;height:4px;margin-left:-20px;border-radius:2px;background:#5f6368}
+#guideBar:hover::before{background:#9aa0a6}
 #guideBar.top{bottom:auto;top:76px}
-.gb-n{flex:none;font-size:11px;line-height:14px;background:#fbbc04;color:#202124;border-radius:10px;padding:3px 8px;font-weight:700;margin-top:2px;white-space:nowrap}
+#guideBar.free{bottom:auto;transform:none}
+#guideBar.dragging{cursor:grabbing;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.gb-l{flex:none;display:flex;flex-direction:column;align-items:center;gap:8px}
+.gb-n{flex:none;font-size:calc(11px * var(--z));line-height:calc(14px * var(--z));background:#fbbc04;color:#202124;border-radius:10px;padding:calc(3px * var(--z)) calc(8px * var(--z));font-weight:700;margin-top:2px;white-space:nowrap}
 .gb-x{flex:1;min-width:0}
-.gb-m{font-size:11px;color:#bdc1c6;margin-bottom:2px}
-.gb-t{font-weight:500;font-size:15px;line-height:20px}
-.gb-d{font-size:12.5px;line-height:18px;color:#dadce0;margin-top:3px}
-.gb-f{font-size:12.5px;line-height:18px;color:#f28b82;margin-top:4px;font-weight:500}
+.gb-m{font-size:calc(11px * var(--z));color:#bdc1c6;margin-bottom:2px}
+.gb-t{font-weight:500;font-size:calc(15px * var(--z));line-height:calc(20px * var(--z))}
+.gb-d{font-size:calc(12.5px * var(--z));line-height:calc(18px * var(--z));color:#dadce0;margin-top:3px}
+.gb-f{font-size:calc(12.5px * var(--z));line-height:calc(18px * var(--z));color:#f28b82;margin-top:4px;font-weight:500}
 .gb-b{display:flex;flex-direction:column;gap:4px;flex:none}
-.gb-b button{height:26px;padding:0 10px;border-radius:4px;border:1px solid #5f6368;background:none;color:#e8eaed;font-size:12px;cursor:pointer;white-space:nowrap}
-.gb-b button:hover{background:#3c4043}
-.gb-b button[disabled]{opacity:.35;pointer-events:none}
+.gb-b button,.gb-z button{height:max(24px,calc(26px * var(--z)));padding:0 calc(10px * var(--z));border-radius:4px;border:1px solid #5f6368;background:none;color:#e8eaed;font-size:calc(12px * var(--z));cursor:pointer;white-space:nowrap}
+.gb-z{display:flex;gap:4px}
+.gb-z button{width:max(24px,calc(26px * var(--z)));padding:0;font-size:calc(16px * var(--z));font-weight:700;line-height:1}
+.gb-b button:hover,.gb-z button:hover{background:#3c4043}
+.gb-b button[disabled],.gb-z button[disabled]{opacity:.35;pointer-events:none}
 
 /* ===== 반응형 ===== */
 body.nav-mini #nav{width:72px}
@@ -525,7 +533,7 @@ body.nav-mini .nv .nic{position:static}
   .utbl .row-acts{position:static;transform:none;background:none;padding-left:0}
   .tbl.utbl td.c-login,.tbl.utbl td.c-stor{display:none}
   .row-acts .ra-x{display:none}
-  #guideBar{width:calc(100vw - 16px);bottom:8px;padding:10px}
+  #guideBar{width:calc(100vw - 16px);bottom:8px;padding:16px 10px 10px}
   #mpFab{right:12px;bottom:12px}
   #toast{left:8px;right:8px;bottom:12px}
   .snack{min-width:0}
@@ -641,7 +649,7 @@ body.nav-mini .nv .nic{position:static}
     <div id="navList"></div>
     <div class="nav-foot">
       <button class="fb tbtn" style="color:var(--fg2);font-weight:400;padding:0" data-act="mock"><svg class="ic"><use href="#i-feedback"/></svg>의견 보내기</button>
-      <span class="sim">연수용 모의 화면입니다. 실제 관리 콘솔과 다를 수 있고, 학교·사용자·개인정보는 모두 가상입니다.<br>제작 송쌤과학 · v2.1</span>
+      <span class="sim">연수용 모의 화면입니다. 실제 관리 콘솔과 다를 수 있고, 학교·사용자·개인정보는 모두 가상입니다.<br>제작 송쌤과학 · v2.2</span>
     </div>
   </nav>
   <div id="navDim" data-act="nav-close"></div>
@@ -1305,7 +1313,7 @@ DLG.help = () => ({
   <h3 style="font-size:15px;font-weight:500;margin:16px 0 6px">따라하기</h3>
   <p>오른쪽 <b>실습 미션</b>에서 [따라하기]를 누르면 눌러야 할 곳이 노랗게 반짝이고, 화면 아래 안내 띠에 단계 설명이 나옵니다. 안내 없이 직접 해도 결과가 맞으면 미션이 완료됩니다.</p>
   <p class="small muted">연수용 보조 기능(가명 자동 채우기, 가명 학생 CSV 만들기, CSV 미리보기)은 실제 콘솔에 없는 기능입니다. 파란 점선 상자로 표시했습니다.</p>
-  <p class="small muted">제작 송쌤과학 · v2.1 · Google 로고와 상표 그림은 쓰지 않았습니다. 앱 이름은 설명을 위해 적은 것이며 해당 회사와 관계가 없습니다.</p>`,
+  <p class="small muted">제작 송쌤과학 · v2.2 · Google 로고와 상표 그림은 쓰지 않았습니다. 앱 이름은 설명을 위해 적은 것이며 해당 회사와 관계가 없습니다.</p>`,
   foot: `<button class="btn btn-outlined" data-act="reset-ask">처음 상태로</button><span class="sp"></span><button class="btn btn-filled" data-act="dlg-close">닫기</button>`
 });
 
@@ -2859,7 +2867,7 @@ mockPage('chrome-web', '웹 기능', () => `<div class="card"><div class="empty"
 mockPage('chrome-connectors', '커넥터', () => `<div class="card"><div class="empty">연결된 커넥터가 없습니다.</div></div>`);
 
 /* ============ 실습 미션 ============ */
-/* 미션은 순서대로 열린다(앞 미션을 끝내야 다음 미션). 결과가 맞으면 따라하기 없이 직접 해도 완료된다. */
+/* 미션은 어느 것부터 해도 된다(앞 미션을 안 했으면 필요한 상태를 prep 으로 준비). 결과가 맞으면 따라하기 없이 직접 해도 완료된다. */
 const R_ = () => ROUTE;
 const dlgIs = t => !!(D && D.type === t);
 const since = (ev, t0, pred) => S.audit.some(a => a.event === ev && a.t >= t0 && (!pred || pred(a)));
@@ -2897,7 +2905,9 @@ const MISSIONS = [
       { in: 'pwDone', final: true, sel: '[data-act="done-reset"]', t: '「완료」 누르기', d: '학생에게 새 비밀번호를 전달하면 끝입니다.', sig: 'done-reset' }
     ] },
   { id: 'm3', grp: 'acct', n: '전출 교사 계정 삭제 + 데이터 이전', min: 3, d: '전출하는 한은빈(t112) 선생님 계정을 지우면서 수업 자료(Drive)를 홍정보(t101) 선생님에게 넘깁니다.',
-    pre: () => { const u = userById('u_t112'), r = userById('u_t101'); if (!u || u.status === 'deleted') return '한은빈(t112) 선생님이 이미 삭제되어 있습니다. 최근 삭제된 사용자에서 복원하거나 [처음 상태로]를 누르세요.'; if (!r || r.status !== 'active') return '홍정보(t101) 선생님 계정이 활성 상태가 아닙니다.'; return ''; },
+    pre: () => { const u = userById('u_t112'), r = userById('u_t101'); if (!u) return '한은빈(t112) 선생님 계정이 없습니다. [처음 상태로]를 누르세요.'; if (!r || r.status !== 'active') return '홍정보(t101) 선생님 계정이 활성 상태가 아닙니다.'; return ''; },
+    /* 복습이거나 보너스(복원)를 하다 말아 한은빈이 삭제된 채면 되살려 둔다 */
+    prep: () => { const u = userById('u_t112'); if (u.status !== 'deleted') return ''; u.status = 'active'; u.deletedAt = null; u.transfer = null; u.ou = 'ou_teach'; return '연습을 위해 한은빈(t112) 선생님 계정을 되살려 두었습니다.'; },
     check: () => S.audit.some(a => a.event === 'user_delete' && a.target === 't112@' + DOMAIN && a.desc.includes('t101@')),
     steps: [
       { go: 'users', t: '[디렉터리 › 사용자] 열기', d: '사용자 목록으로 갑니다.' },
@@ -2996,8 +3006,10 @@ const MISSIONS = [
       { sel: '[data-field="limit-value"]', t: '저장용량 한도 10, 단위 GB', d: '숫자 칸에 10, 단위는 GB 그대로 둡니다.', done: () => !!(SD && +SD.value === 10 && SD.unit === 'GB'), fail: '10 GB로 맞춰 주세요.', failOn: 'save-storage-try', auto: { type: '10' } },
       { sel: '[data-act="save-storage"]', t: '「재정의」 누르기', d: '저장 뒤 아래 「적용 확인」 표에서 학생들의 한도를 확인하세요.', done: () => { const l = S.storage.byOu.ou_stu && S.storage.byOu.ou_stu.limit; return !!(l && l.value === 10 && l.unit === 'GB'); } }
     ] },
-  { id: 'b1', bonus: true, after: 'm3', preAlways: true, n: '삭제한 사용자 복원', min: 2, d: '실수로 지운 계정을 「최근 삭제된 사용자」에서 되살립니다(20일 이내).',
-    pre: () => { const u = userById('u_t112'); return u && u.status === 'deleted' ? '' : '한은빈(t112) 선생님이 삭제된 상태가 아닙니다. 미션 3을 먼저 하세요.'; },
+  { id: 'b1', bonus: true, n: '삭제한 사용자 복원', min: 2, d: '실수로 지운 계정을 「최근 삭제된 사용자」에서 되살립니다(20일 이내). 미션 3을 안 했어도 [따라하기]를 누르면 한은빈 선생님 계정을 삭제된 상태로 준비해 줍니다.',
+    preAlways: true, pre: () => userById('u_t112') ? '' : '한은빈(t112) 선생님 계정이 없습니다. [처음 상태로]를 누르세요.',
+    /* 미션 3을 건너뛰었거나 이미 복원했으면 복원할 대상을 삭제된 상태로 만든다(데이터 이전 없음 → 미션 3 완료로 잡히지 않음) */
+    prep: () => { const u = userById('u_t112'); if (u.status === 'deleted') return ''; u.status = 'deleted'; u.deletedAt = now(); u.transfer = null; SEL.delete(u.id); audit('user_delete', u.email, '데이터 이전 안 함 (연습 준비)'); return '연습을 위해 한은빈(t112) 선생님 계정을 삭제된 상태로 만들어 두었습니다.'; },
     check: () => S.audit.some(a => a.event === 'user_restore'),
     steps: [
       { go: 'users', t: '[디렉터리 › 사용자] 열기', d: '삭제된 사용자는 목록에 보이지 않습니다.' },
@@ -3006,7 +3018,7 @@ const MISSIONS = [
       { in: 'restore', sel: '#dlgRestore [data-ou-pick="ou_teach"]', t: '조직 단위 「교사」 고르기', d: '되살릴 자리를 정합니다.', done: () => D.ou === 'ou_teach' },
       { in: 'restore', out: true, sel: '[data-act="confirm-restore"]', t: '「복원」 누르기', d: '계정과 데이터가 함께 돌아옵니다.', done: g => since('user_restore', g.t0) }
     ] },
-  { id: 'b2', bonus: true, after: 'm4', n: '오류 있는 CSV 다루기', min: 4, d: '오류 2건이 섞인 CSV를 올려 보고, 작업 로그에서 실패한 행을 확인합니다.',
+  { id: 'b2', bonus: true, n: '오류 있는 CSV 다루기', min: 4, d: '오류 2건이 섞인 CSV를 올려 보고, 작업 로그에서 실패한 행을 확인합니다.',
     check: () => !!S.flags.b2,
     steps: [
       { go: 'users', t: '[디렉터리 › 사용자] 열기', d: '' },
@@ -3017,7 +3029,7 @@ const MISSIONS = [
       { in: 'bulk', out: true, sel: '[data-act="upload-csv"]', t: '「업로드」 누르기', d: '오류 행이 있어도 업로드는 진행되고, 오류 행만 실패합니다(실물과 같음).', done: g => S.tasks.some(t => t.startedAt >= g.t0) },
       { sel: '[data-act="dl-log"]', t: '「로그 다운로드」', d: '잠시 뒤 「완료」가 뜨면 로그를 받습니다. 행 번호대로 파일을 고쳐 다시 올리는 것이 실물 절차입니다.', done: () => !!S.flags.b2, before: () => { if ($('#tasksDrawer').hidden) ACT['open-tasks'](); } }
     ] },
-  { id: 'b3', bonus: true, after: 'm8', n: '로그인 제한(학교 계정만)', min: 3, d: '학생 크롬북에 개인 계정으로 로그인해 학교 필터를 피하지 못하게, 학교 도메인 계정만 로그인하도록 제한합니다.',
+  { id: 'b3', bonus: true, n: '로그인 제한(학교 계정만)', min: 3, d: '학생 크롬북에 개인 계정으로 로그인해 학교 필터를 피하지 못하게, 학교 도메인 계정만 로그인하도록 제한합니다.',
     check: () => { const c = stuLocal('login') || {}; return c.mode === 'list' && /@dtutor\.example/.test(c.allowed || ''); },
     steps: [
       { go: 'chrome-settings', t: '[기기 › Chrome › 설정] 열기', d: '' },
@@ -3038,7 +3050,6 @@ const GROUPS = {
 const MAIN_MISSIONS = MISSIONS.filter(m => !m.bonus);
 const stuDel = part => { const c = S.chrome.byOu.ou_stu; if (c) { delete c[part]; if (!Object.keys(c).length) delete S.chrome.byOu.ou_stu; } };
 const REPLAY_RESET = {
-  m3: () => { const u = userById('u_t112'); if (u && u.status === 'deleted') { u.status = 'active'; u.deletedAt = null; u.transfer = null; u.ou = 'ou_teach'; } },
   m5: () => stuDel('incog'), m6: () => stuDel('url'), m7: () => stuDel('safe'),
   m8: () => { stuDel('sb'); S.flags.sitesSeen = false; },
   m9: () => { S.apps.marketplace = S.apps.marketplace.filter(a => a.id !== 'canva'); },
@@ -3046,15 +3057,15 @@ const REPLAY_RESET = {
   b3: () => stuDel('login')
 };
 function curMainMission() { return MAIN_MISSIONS.find(m => !S.mission.done[m.id]) || null; }
-function missionUnlocked(m) {
-  if (S.mission.done[m.id]) return true;
-  if (m.bonus) return !!S.mission.done[m.after];
-  return curMainMission() === m;
+/* 방금 끝낸 미션 뒤에서 아직 안 한 미션(끝까지 없으면 앞에서 찾음) */
+function nextMainMission(m) {
+  const i = MAIN_MISSIONS.indexOf(m);
+  return MAIN_MISSIONS.slice(i + 1).concat(MAIN_MISSIONS.slice(0, i)).find(x => !S.mission.done[x.id]) || null;
 }
-/* 결과만 보고 완료 처리(순서 지킴: 열린 미션만) */
+/* 결과만 보고 완료 처리(순서와 상관없이) */
 function checkMissions() {
   for (const m of MISSIONS) {
-    if (S.mission.done[m.id] || !missionUnlocked(m)) continue;
+    if (S.mission.done[m.id]) continue;
     if (GD && GD.id === m.id && !GD.replay) continue;   /* 따라하기 중이면 코치가 끝맺는다 */
     if (m.check()) { S.mission.done[m.id] = now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} missionDoneNotice(m); }
   }
@@ -3072,18 +3083,17 @@ function renderMp() {
   const cur = curMainMission();
   const sc = $('#mp .mp-list') ? $('#mp .mp-list').scrollTop : 0;
   const card = (m, i) => {
-    const isDone = !!S.mission.done[m.id], unlocked = missionUnlocked(m), active = GD && GD.id === m.id;
-    const pre = unlocked && !isDone && m.pre ? m.pre() : '';
-    return `<div class="mc ${isDone ? 'done' : ''} ${active || (!GD && cur === m) ? 'cur' : ''} ${unlocked ? '' : 'locked'}" data-mission="${m.id}">
+    const isDone = !!S.mission.done[m.id], active = GD && GD.id === m.id;
+    const pre = !isDone && m.pre ? m.pre() : '';
+    return `<div class="mc ${isDone ? 'done' : ''} ${active || (!GD && cur === m) ? 'cur' : ''}" data-mission="${m.id}">
       <div class="mc-h"><span class="num">${isDone ? '✓' : m.bonus ? 'B' : i + 1}</span><span class="mc-t">${esc(m.n)}${m.bonus ? '<span class="chip-bonus">보너스</span>' : ''}</span><span class="mc-m">${m.min}분</span></div>
       <div class="mc-d">${esc(m.d)}${pre ? `<br><span style="color:#b06000">${esc(pre)}</span>` : ''}</div>
       <div class="mc-a">${active ? `<span class="chip b">따라하는 중 · ${GD.i + 1}/${m.steps.length}단계</span><button class="btn btn-text btn-sm" data-act="coach-stop">그만</button>`
         : isDone ? `<span class="chip g">완료</span><button class="btn btn-text btn-sm" data-act="coach-start" data-mission="${m.id}">${ic('restore', 'sm')}다시</button>`
-        : unlocked ? `<button class="btn btn-filled btn-sm" data-act="coach-start" data-mission="${m.id}" ${pre ? 'disabled' : ''}>${ic('play', 'sm')}따라하기</button><span class="small muted">안내 없이 직접 해도 됩니다</span>`
-        : `<span class="small muted">🔒 ${m.bonus ? `미션 ${MAIN_MISSIONS.findIndex(x => x.id === m.after) + 1}을 마치면 열립니다` : '앞 미션을 마치면 열립니다'}</span>`}</div></div>`;
+        : `<button class="btn btn-filled btn-sm" data-act="coach-start" data-mission="${m.id}" ${pre ? 'disabled' : ''}>${ic('play', 'sm')}따라하기</button><span class="small muted">안내 없이 직접 해도 됩니다</span>`}</div></div>`;
   };
   mp.innerHTML = `<div class="mp-h"><div class="row"><b>실습 미션</b><button class="tb-ic" data-act="mp-close" aria-label="미션 패널 접기" title="접기">${ic('close')}</button></div>
-    <p>실제 관리 콘솔의 메뉴 순서를 그대로 따라갑니다. 1번부터 차례로 열립니다.</p>
+    <p>실제 관리 콘솔의 메뉴 순서를 그대로 따라갑니다. 앞 미션을 안 했어도 원하는 미션부터 할 수 있습니다.</p>
     <div class="mp-bar"><i style="width:${done / tot * 100}%"></i></div><div class="mp-prog">${done}/${tot} 완료</div></div>
     <div class="mp-list">${done === tot ? '<div class="mp-done-all">모든 미션 완료 · 수고하셨습니다! 아래 [진행 상황 저장]으로 기록을 남겨 두세요.</div>' : ''}
       ${MAIN_MISSIONS.map((m, i) => (i === 0 || MAIN_MISSIONS[i - 1].grp !== m.grp ? `<div style="margin:${i ? 16 : 2}px 2px 8px"><b style="font-size:13px;font-weight:500">${esc(GROUPS[m.grp][0])}</b>${GROUPS[m.grp][1] ? `<div class="small muted" style="margin-top:3px;line-height:16px">${esc(GROUPS[m.grp][1])}</div>` : ''}</div>` : '') + card(m, i)).join('')}
@@ -3099,7 +3109,7 @@ function missionDoneNotice(m) {
   renderMp();
   /* 설치 완료 창처럼 결과를 보여 주는 창이 열려 있으면, 그 창을 닫은 뒤에 알린다 */
   if (D && D.type !== 'mDone') { PENDING_DONE = m; toast(`미션 완료: ${m.n}`, 'ok'); return; }
-  const next = m.bonus ? null : curMainMission();
+  const next = m.bonus ? null : nextMainMission(m);
   openDlg({ type: 'mDone', mid: m.id, next: next && next.id });
 }
 function afterDlgClose() {
@@ -3112,7 +3122,7 @@ DLG.mDone = d => {
   const done = MAIN_MISSIONS.filter(x => S.mission.done[x.id]).length;
   return { title: '미션 완료! 🎉', id: 'dlgMDone',
     body: `<div class="done-mark">${ic('check')}</div><p style="text-align:center"><b>${esc(m.n)}</b>을(를) 마쳤습니다. (${done}/${MAIN_MISSIONS.length})</p>
-      ${nx ? `<div class="note">${ic('flag')}<div>다음 미션: <b>${esc(nx.n)}</b><br><span class="small">${esc(nx.d)}</span></div></div>` : done === MAIN_MISSIONS.length ? '<div class="note g">' + ic('check') + '<div>필수 미션 7개를 모두 끝냈습니다. 미션 패널의 [진행 상황 저장(PNG)]으로 기록을 남기고, 보너스 미션도 해 보세요.</div></div>' : ''}`,
+      ${nx ? `<div class="note">${ic('flag')}<div>다음 미션: <b>${esc(nx.n)}</b><br><span class="small">${esc(nx.d)}</span></div></div>` : done === MAIN_MISSIONS.length ? '<div class="note g">' + ic('check') + '<div>필수 미션 ' + MAIN_MISSIONS.length + '개를 모두 끝냈습니다. 미션 패널의 [진행 상황 저장(PNG)]으로 기록을 남기고, 보너스 미션도 해 보세요.</div></div>' : ''}`,
     foot: nx ? `<button class="btn btn-text" data-act="dlg-close">나중에</button><button class="btn btn-filled" data-act="coach-start" data-mission="${nx.id}">${ic('play', 'sm')}다음 미션 따라하기</button>`
       : `<button class="btn btn-filled" data-act="dlg-close">확인</button>`
   };
@@ -3142,14 +3152,16 @@ ACT['coach-skip'] = () => {
 };
 function coachStart(id) {
   const m = MISSIONS.find(x => x.id === id); if (!m) return;
-  if (!missionUnlocked(m)) { toast('앞 미션을 먼저 마쳐 주세요.', 'no'); return; }
   const pre = m.pre && (!S.mission.done[m.id] || m.preAlways) ? m.pre() : '';
   if (pre) { toast(pre, 'no'); return; }
   closeDlg(); closePops();
   if (!$('#tasksDrawer').hidden && m.id !== 'b2') $('#tasksDrawer').hidden = true;
   GD = { id, i: 0, t0: now(), stepT: now(), replay: !!S.mission.done[id], fail: '', seen: null };
   /* 복습: 이전 실습 결과가 남아 있으면 단계가 저절로 넘어가므로 이 미션의 결과만 지운다 */
-  if (GD.replay && REPLAY_RESET[id]) { REPLAY_RESET[id](); toast(`복습을 위해 「${m.n}」의 이전 결과를 지웠습니다.`); }
+  let note = '';
+  if (GD.replay && REPLAY_RESET[id]) { REPLAY_RESET[id](); note = `복습을 위해 「${m.n}」의 이전 결과를 지웠습니다. `; }
+  /* 앞 미션을 건너뛰었으면 이 미션에 필요한 상태를 준비한다 */
+  if (m.prep) { const t = m.prep(); if (t) note += t + ' '; }
   /* 실물처럼 매번 처음(최상위)에서 조직 단위를 고르게 */
   if (m.grp === 'web' || id === 'b3') S.ui.chromeOu = 'ou_root';
   if (id === 'm10') S.ui.storageOu = 'ou_root';
@@ -3161,7 +3173,7 @@ function coachStart(id) {
   if (id === 'm10') { S.ui.storageKind = 'ou'; }
   if (innerWidth < 1280) { S.ui.mpOpen = false; }
   save();
-  toast(`「${m.n}」 따라하기를 시작합니다. 노랗게 반짝이는 곳을 누르세요.`);
+  toast(`${note}「${m.n}」 따라하기를 시작합니다. 노랗게 반짝이는 곳을 누르세요.`);
   if (ROUTE.key === 'users') rerenderMain(); else renderMp();
   coachCheck();
 }
@@ -3251,15 +3263,59 @@ function coachPaint() {
   }
   if (st.go && !st.sel && innerWidth < 1024 && !document.body.classList.contains('nav-open')) document.body.classList.add('nav-open');
   const hint = !tgt && !st.go ? '<div class="gb-d" style="color:#fdd663">반짝일 곳이 지금 화면에 없어요. 앞 단계를 다시 확인하거나 [이전]을 누르세요.</div>' : '';
-  bar.innerHTML = `<span class="gb-n">${GD.i + 1}/${m.steps.length}</span><div class="gb-x"><div class="gb-m">${GD.replay ? '복습 · ' : ''}${esc(m.n)}</div><div class="gb-t">${esc(st.t)}</div>${st.d ? `<div class="gb-d">${esc(st.d)}</div>` : ''}${hint}${GD.fail ? `<div class="gb-f">${esc(GD.fail)}</div>` : ''}</div>
+  const zi = gbZi();
+  const html = `<div class="gb-l"><span class="gb-n">${GD.i + 1}/${m.steps.length}</span><div class="gb-z"><button data-gbz="-1" ${zi ? '' : 'disabled'} aria-label="안내창 축소" title="안내창 축소">−</button><button data-gbz="1" ${zi < GB_Z.length - 1 ? '' : 'disabled'} aria-label="안내창 확대" title="안내창 확대">+</button></div></div><div class="gb-x"><div class="gb-m">${GD.replay ? '복습 · ' : ''}${esc(m.n)}</div><div class="gb-t">${esc(st.t)}</div>${st.d ? `<div class="gb-d">${esc(st.d)}</div>` : ''}${hint}${GD.fail ? `<div class="gb-f">${esc(GD.fail)}</div>` : ''}</div>
     <div class="gb-b"><button data-act="coach-prev" ${GD.i === 0 ? 'disabled' : ''}>이전</button><button data-act="coach-skip" ${GD.i >= m.steps.length - 1 ? 'disabled' : ''}>건너뛰기</button><button data-act="coach-stop">그만</button></div>`;
+  /* 0.6초마다 불리므로 내용이 같으면 다시 그리지 않는다(누르는 도중 단추가 바뀌지 않게) */
+  if (bar._html !== html) { bar._html = html; bar.innerHTML = html; }
+  bar.style.setProperty('--z', GB_Z[zi]);
   bar.hidden = false;
   bar.classList.remove('top');
+  gbPlace();
+  if (S.ui.gbPos) return;   /* 끌어서 옮긴 자리는 그대로 둔다 */
   if (tgt) {
     const r = tgt.getBoundingClientRect(), b = bar.getBoundingClientRect();
     if (!(r.right < b.left || r.left > b.right || r.bottom < b.top || r.top > b.bottom)) bar.classList.add('top');
   }
 }
+/* 안내 띠: 마우스·손가락으로 끌어 옮기기, 축소·확대(위치와 크기는 S.ui에 저장) */
+const GB_Z = [0.8, 0.9, 1, 1.15, 1.3, 1.5];
+function gbZi() { const i = GB_Z.indexOf(S.ui.gbZ); return i < 0 ? GB_Z.indexOf(1) : i; }
+function gbPlace() {   /* 옮긴 자리가 화면 밖으로 나가지 않게 맞춰 놓는다 */
+  const bar = $('#guideBar'), p = S.ui.gbPos;
+  bar.classList.toggle('free', !!p);
+  if (!p) { bar.style.left = bar.style.top = ''; return; }
+  bar.style.left = Math.max(4, Math.min(p.x, innerWidth - bar.offsetWidth - 4)) + 'px';
+  bar.style.top = Math.max(4, Math.min(p.y, innerHeight - bar.offsetHeight - 4)) + 'px';
+}
+let GB_DRAG = null;
+$('#guideBar').addEventListener('pointerdown', e => {
+  if (GB_DRAG || e.button || e.target.closest('button')) return;
+  const bar = e.currentTarget, r = bar.getBoundingClientRect();
+  GB_DRAG = { id: e.pointerId, sx: e.clientX, sy: e.clientY, dx: e.clientX - r.left, dy: e.clientY - r.top, moved: false };
+  bar.setPointerCapture(e.pointerId);
+});
+$('#guideBar').addEventListener('pointermove', e => {
+  const g = GB_DRAG; if (!g || e.pointerId !== g.id) return;
+  if (!g.moved && Math.abs(e.clientX - g.sx) + Math.abs(e.clientY - g.sy) < 5) return;   /* 살짝 누른 것은 끌기가 아님 */
+  g.moved = true; e.currentTarget.classList.add('dragging');
+  S.ui.gbPos = { x: e.clientX - g.dx, y: e.clientY - g.dy };
+  gbPlace();
+});
+const gbDragEnd = e => {
+  const g = GB_DRAG; if (!g || e.pointerId !== g.id) return;
+  GB_DRAG = null; e.currentTarget.classList.remove('dragging');
+  if (g.moved) { const bar = e.currentTarget; S.ui.gbPos = { x: parseFloat(bar.style.left), y: parseFloat(bar.style.top) }; save(); }
+};
+['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => $('#guideBar').addEventListener(t, gbDragEnd));
+/* 띠를 누르거나 끌 때 입력칸 포커스가 빠지지 않게 */
+$('#guideBar').addEventListener('mousedown', e => { if (!e.target.closest('[data-act]')) e.preventDefault(); });
+$('#guideBar').addEventListener('click', e => {
+  const z = e.target.closest('[data-gbz]');
+  if (z) { S.ui.gbZ = GB_Z[Math.max(0, Math.min(GB_Z.length - 1, gbZi() + +z.getAttribute('data-gbz')))]; save(); coachPaint(); }
+  /* 띠를 끌거나 축소·확대해도 열어 둔 메뉴·검색 결과가 닫히지 않게 문서 클릭 처리로 넘기지 않는다 */
+  if (!e.target.closest('[data-act]')) e.stopPropagation();
+});
 setInterval(() => { if (GD) coachCheck(); }, 600);
 window.addEventListener('resize', () => { if (GD) { GD.seen = null; coachPaint(); } });
 
@@ -3298,7 +3354,7 @@ const tick = () => Promise.resolve();
 async function runMission(id) {
   const t0 = performance.now(), log = [];
   coachStart(id);
-  if (!GD) return { id, ok: false, err: '시작 못 함(잠김 또는 선행 조건)' };
+  if (!GD) return { id, ok: false, err: '시작 못 함(선행 조건)' };
   const m = MISSIONS.find(x => x.id === id);
   let lastI = -1, same = 0;
   for (let guard = 0; guard < 400 && GD && GD.id === id; guard++) {
