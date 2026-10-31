@@ -238,7 +238,7 @@ td.c-acts{padding:0 !important}
 .frow .q input{border:0;outline:0;flex:1;height:32px;background:none;min-width:0}
 .two{display:grid;grid-template-columns:270px minmax(0,1fr);gap:12px;align-items:start;padding:16px 24px 0}
 .two.closed{grid-template-columns:44px minmax(0,1fr)}
-@container main (max-width:820px){.two{grid-template-columns:minmax(0,1fr)}.two>.lp{display:none}.two .lp-chip{display:inline-flex !important}}
+@container main (max-width:820px){.two,.two.closed{grid-template-columns:minmax(0,1fr)}.two>.lp .lp-scroll{max-height:200px}.two>.lp .lp-title{padding:12px 16px}.two>.lp .lp-title b{font-size:18px}}
 .lp-chip{display:none !important}
 /* 왼쪽 선택 패널 */
 .lp{background:#fff;border:1px solid var(--border);border-radius:8px;position:relative;overflow:hidden}
@@ -553,6 +553,11 @@ body.nav-mini .nv .nic{position:static}
 .ougrid-l{border-right:1px solid var(--line);padding:8px 0}
 @container main (max-width:700px){.ougrid{grid-template-columns:minmax(0,1fr)}.ougrid-l{border-right:0;border-bottom:1px solid var(--line)}}
 
+/* 따라하기 중에는 오른쪽 아래 「실습 미션」 단추가 누를 곳(저장·재정의·쪽 넘김)을 덮지 않게 숨긴다 */
+body.guiding #mpFab{display:none}
+.newtag{height:20px;padding:0 8px;margin-left:2px;font-size:11px}
+.utbl tr:has(.newtag) td{background:#fffbeb}
+
 </style>
 </head>
 <body>
@@ -649,7 +654,7 @@ body.nav-mini .nv .nic{position:static}
     <div id="navList"></div>
     <div class="nav-foot">
       <button class="fb tbtn" style="color:var(--fg2);font-weight:400;padding:0" data-act="mock"><svg class="ic"><use href="#i-feedback"/></svg>의견 보내기</button>
-      <span class="sim">연수용 모의 화면입니다. 실제 관리 콘솔과 다를 수 있고, 학교·사용자·개인정보는 모두 가상입니다.<br>제작 송쌤과학 · v2.2</span>
+      <span class="sim">연수용 모의 화면입니다. 실제 관리 콘솔과 다를 수 있고, 학교·사용자·개인정보는 모두 가상입니다.<br>제작 송쌤과학 · v2.3</span>
     </div>
   </nav>
   <div id="navDim" data-act="nav-close"></div>
@@ -670,7 +675,7 @@ body.nav-mini .nv .nic{position:static}
 <div id="popRoot"></div>
 <div id="guideBar" hidden role="status" aria-live="polite"></div>
 <div id="toast" aria-live="polite"></div>
-<input type="file" id="csvFile" accept=".csv,text/csv" hidden>
+<input type="file" id="csvFile" accept=".csv,text/csv,.xlsx,.xls" hidden>
 
 <script>
 (function () {
@@ -923,8 +928,8 @@ function onRoute() {
   if (typeof resetDrafts === 'function') resetDrafts();
   const pg = PAGES[ROUTE.key];
   for (const id of navAncestors(pg.nav || ROUTE.key)) if (!S.ui.navExp.includes(id)) S.ui.navExp.push(id);
-  render();
   $('#content').scrollTop = 0;
+  render();
 }
 
 /* ============ 화면 그리기 ============ */
@@ -1091,7 +1096,7 @@ document.addEventListener('click', e => {
   if (!popJust && !(inPop && t.closest('[data-keep-pop]'))) {
     if (!inPop || handled) closePops();
   }
-  if (!t.closest('#tsearchWrap')) hideTopResults();
+  if (!t.closest('#tsearchWrap') && !t.closest('[data-act="search-open"]')) hideTopResults();   /* 휴대폰 돋보기로 연 검색창을 같은 클릭에서 닫지 않게 */
   if (typeof coachCheck === 'function') setTimeout(coachCheck, 0);
 });
 
@@ -1288,7 +1293,7 @@ function renderTasks() {
      ${t.status === 'running' ? `<div class="pg"><i></i></div><div class="small muted">진행 중…</div>` : `
        <div class="chip g">완료</div>
        <div class="sumr"><span class="chip b">추가 ${t.summary.add}</span><span class="chip">업데이트 ${t.summary.update}</span><span class="chip ${t.summary.fail ? 'r' : ''}">실패 ${t.summary.fail}</span></div>
-       <button class="btn btn-outlined btn-sm" data-act="dl-log" data-task="${t.id}">${ic('download')}로그 다운로드</button>
+       ${(t.addedIds || []).length + (t.updatedIds || []).length ? `<button class="btn btn-filled btn-sm" data-act="task-view" data-task="${t.id}" style="margin-right:6px">${ic('person', 'sm')}반영된 사용자 보기</button>` : ''}<button class="btn btn-outlined btn-sm" data-act="dl-log" data-task="${t.id}">${ic('download')}로그 다운로드</button>
        <p class="small muted" style="margin:8px 0 0">CSV로 추가한 계정에는 환영 이메일이 가지 않으니 로그인 정보를 학생에게 따로 전달하세요.</p>`}
    </div>`).join('') : '<div class="empty">아직 작업이 없습니다.<br><span class="small">사용자 일괄 업데이트(CSV)를 올리면 여기에 진행 상황이 나옵니다.</span></div>'}</div>`;
 }
@@ -1313,7 +1318,7 @@ DLG.help = () => ({
   <h3 style="font-size:15px;font-weight:500;margin:16px 0 6px">따라하기</h3>
   <p>오른쪽 <b>실습 미션</b>에서 [따라하기]를 누르면 눌러야 할 곳이 노랗게 반짝이고, 화면 아래 안내 띠에 단계 설명이 나옵니다. 안내 없이 직접 해도 결과가 맞으면 미션이 완료됩니다.</p>
   <p class="small muted">연수용 보조 기능(가명 자동 채우기, 가명 학생 CSV 만들기, CSV 미리보기)은 실제 콘솔에 없는 기능입니다. 파란 점선 상자로 표시했습니다.</p>
-  <p class="small muted">제작 송쌤과학 · v2.2 · Google 로고와 상표 그림은 쓰지 않았습니다. 앱 이름은 설명을 위해 적은 것이며 해당 회사와 관계가 없습니다.</p>`,
+  <p class="small muted">제작 송쌤과학 · v2.3 · Google 로고와 상표 그림은 쓰지 않았습니다. 앱 이름은 설명을 위해 적은 것이며 해당 회사와 관계가 없습니다.</p>`,
   foot: `<button class="btn btn-outlined" data-act="reset-ask">처음 상태로</button><span class="sp"></span><button class="btn btn-filled" data-act="dlg-close">닫기</button>`
 });
 
@@ -1391,11 +1396,12 @@ document.addEventListener('input', e => {
   if (!c1 && !c2) return;
   const st = lpState(c1 || c2); if (c1) st.uq = el.value; else st.oq = el.value;
   const pos = el.selectionStart; rerenderMain();
-  const n = $(`[data-lp-${c1 ? 'q' : 'oq'}="${c1 || c2}"]`); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) {} }
+  const n = $(`[data-lp-${c1 ? 'q' : 'oq'}="${c1 || c2}"]`); if (n) { n.focus({ preventScroll: true }); try { n.setSelectionRange(pos, pos); } catch (x) {} }
 });
 
 /* ============ 사용자 목록 ============ */
 const SEL = new Set();
+const RECENT = new Map();   /* 이번에 추가('add')·업데이트('upd')한 사용자 — 목록에 표시(연수용) */
 let COACH_PIN = null;
 const grayAv = (s = 32) => `<span class="uav gray" style="width:${s}px;height:${s}px"><svg viewBox="0 0 24 24" style="width:${Math.round(s * .7)}px;height:${Math.round(s * .7)}px;fill:#fff;margin-top:${Math.round(s * .18)}px"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></span>`;
 function statusText(u) { return u.status === 'suspended' ? '<span style="color:#b06000">일시중지됨</span>' : '활성'; }
@@ -1406,6 +1412,7 @@ function usersFiltered() {
   const q = (S.ui.usersQ || '').trim().toLowerCase();
   if (q) list = list.filter(u => (uName(u) + ' ' + u.email + ' ' + u.employeeId).toLowerCase().includes(q));
   list.sort((a, b) => uName(a).localeCompare(uName(b), 'ko'));
+  if (S.ui.usersNewFirst && RECENT.size) list = list.filter(u => RECENT.has(u.id)).concat(list.filter(u => !RECENT.has(u.id)));
   if (COACH_PIN) { const i = list.findIndex(u => u.id === COACH_PIN); if (i > 0) list.unshift(list.splice(i, 1)[0]); }
   return list;
 }
@@ -1417,7 +1424,7 @@ function usersTableHTML() {
   const allOn = slice.length && slice.every(u => SEL.has(u.id));
   const rows = slice.map(u => `<tr class="${SEL.has(u.id) ? 'sel' : ''}" data-row="${u.id}">
     <td class="cb"><input type="checkbox" data-act="sel-user" data-user="${u.id}" ${SEL.has(u.id) ? 'checked' : ''} aria-label="${esc(uName(u))} 선택"></td>
-    <td class="c-name"><div class="ucell">${grayAv()}<a href="#/user/${u.id}" data-go="user" data-param="${u.id}" data-user="${u.id}">${esc(uName(u))}</a></div></td>
+    <td class="c-name"><div class="ucell">${grayAv()}<a href="#/user/${u.id}" data-go="user" data-param="${u.id}" data-user="${u.id}">${esc(uName(u))}</a>${RECENT.has(u.id) ? `<span class="chip ${RECENT.get(u.id) === 'add' ? 'y' : 'b'} newtag" title="연수용 표시 — 실제 콘솔엔 없음">${RECENT.get(u.id) === 'add' ? '새로 추가' : '업데이트됨'}</span>` : ''}</div></td>
     <td class="c-email"><div class="ellip">${esc(u.email)}</div></td>
     <td class="c-login">${u.lastLogin ? relLogin(u.lastLogin) : '로그인하지 않음'}</td>
     <td class="c-stor">${(u.storageUsedMB / 1024).toFixed(u.storageUsedMB < 1024 ? 3 : 2).replace(/\.?0+$/, '') || 0}GB</td>
@@ -1492,7 +1499,7 @@ function refreshUsersTable() {
   const sb = $('#selBar'); if (sb) sb.innerHTML = selBarHTML();
   if (typeof coachCheck === 'function') coachCheck();
 }
-PICK.ufilter = id => { S.ui.usersOu = id === 'ou_root' ? null : id; S.ui.usersPage = 0; SEL.clear(); save(); closePops(); rerenderMain(); sig('ou-filter', id); };
+PICK.ufilter = id => { S.ui.usersOu = id === 'ou_root' ? null : id; S.ui.usersPage = 0; S.ui.usersNewFirst = false; SEL.clear(); save(); closePops(); rerenderMain(); sig('ou-filter', id); };
 ACT['uscope-all'] = () => { S.ui.usersOu = null; save(); rerenderMain(); };
 ACT['uscope-sel'] = () => { toast('왼쪽 나무에서 조직 단위를 고르세요.'); };
 ACT['ulp-toggle'] = () => { S.ui.uLpClosed = !S.ui.uLpClosed; save(); rerenderMain(); };
@@ -1754,7 +1761,7 @@ ACT['submit-add-user'] = () => {
     pwd: { mustChange: D.pwMode === 'custom' ? !!D.mustChange : true, lastReset: null, value: pw }, recoveryEmail: (D.recEmail || '').trim(), phone: (D.phone || '').trim(), createdBy: 'manual', lastLogin: null });
   u.id = 'u_' + local.replace(/[^a-z0-9_]/g, '_');
   while (userById(u.id)) u.id += '_';
-  S.users.push(u);
+  S.users.push(u); RECENT.set(u.id, 'add');
   audit('user_create', u.email, '조직 단위 ' + ouPath(u.ou));
   save();
   openDlg({ type: 'userAdded', uid: u.id, pw, show: false });
@@ -1924,7 +1931,20 @@ HMAP[normH('New Licenses')] = 'license'; HMAP[normH('Org Unit Path')] = 'ou';
 function csvCell(v) { v = v == null ? '' : String(v); return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
 function csvText(rows) { return '﻿' + rows.map(r => r.map(csvCell).join(',')).join('\r\n') + '\r\n'; }
 function csvRowFor(o) { return CSV_COLS.map(c => o[c[0]] == null ? '' : o[c[0]]); }
-function parseCSV(text) {
+/* 엑셀이 저장하는 방식이 여러 가지라 바이트를 보고 판별한다:
+   「CSV UTF-8」=UTF-8(BOM), 윈도우 엑셀 기본 「CSV(쉼표로 분리)」=CP949, 「유니코드 텍스트」=UTF-16 */
+function decodeCsvBytes(buf) {
+  const u8 = new Uint8Array(buf);
+  if (u8[0] === 0xFF && u8[1] === 0xFE) return { text: new TextDecoder('utf-16le').decode(u8), enc: 'UTF-16' };
+  if (u8[0] === 0xFE && u8[1] === 0xFF) return { text: new TextDecoder('utf-16be').decode(u8), enc: 'UTF-16' };
+  try { return { text: new TextDecoder('utf-8', { fatal: true }).decode(u8), enc: u8[0] === 0xEF && u8[1] === 0xBB && u8[2] === 0xBF ? 'UTF-8(BOM)' : 'UTF-8' }; }
+  catch (e) { return { text: new TextDecoder('euc-kr').decode(u8), enc: 'CP949' }; }
+}
+function sniffDelim(text) {   /* 첫 줄에서 가장 많이 나온 구분 기호(쉼표·세미콜론·탭) */
+  const first = String(text).split(/\r\n|\n|\r/)[0] || '';
+  let best = ',', n = -1; for (const d of [',', ';', '\t']) { const c = first.split(d).length - 1; if (c > n) { n = c; best = d; } } return best;
+}
+function parseCSV(text, delim = ',') {
   const rows = []; let row = [], f = '', q = false;
   for (let i = 0; i < text.length; i++) {
     const c = text[i];
@@ -1932,7 +1952,7 @@ function parseCSV(text) {
       if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; }
       else f += c;
     } else if (c === '"') q = true;
-    else if (c === ',') { row.push(f); f = ''; }
+    else if (c === delim) { row.push(f); f = ''; }
     else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(f); rows.push(row); row = []; f = ''; }
     else f += c;
   }
@@ -1958,12 +1978,13 @@ function makeFakeCsv(n, ouPathStr, mix) {
 }
 
 /* CSV 검사 */
-function analyzeCsv(text) {
-  const res = { rows: [], counts: { add: 0, update: 0, fail: 0 }, warns: [], fatal: null, total: 0 };
+function analyzeCsv(text, enc = 'UTF-8') {
+  const res = { rows: [], counts: { add: 0, update: 0, fail: 0 }, warns: [], fatal: null, total: 0, enc };
   text = String(text || '').replace(/^﻿/, '');
   const bad = (text.match(/�/g) || []).length;
   if (bad > 2) { res.fatal = '한글이 깨져 보입니다. 엑셀에서 「CSV UTF-8(쉼표로 분리)」 형식으로 다시 저장해 주세요.'; return res; }
-  const all = parseCSV(text).filter(r => r.some(c => String(c).trim() !== ''));
+  res.delim = sniffDelim(text);
+  const all = parseCSV(text, res.delim).filter(r => r.some(c => String(c).trim() !== ''));
   if (!all.length) { res.fatal = '파일이 비어 있음'; return res; }
   const head = all[0].map(h => HMAP[normH(h)] || null);
   all[0].forEach((h, i) => { if (!head[i] && String(h).trim()) res.warns.push(`알 수 없는 열 '${h}'은(는) 무시됩니다`); });
@@ -2006,7 +2027,8 @@ DLG.bulk = d => {
   const p = d.prev;
   let prevHTML = '';
   if (d.file) {
-    prevHTML = `<div class="file-line">${ic('file')}<b>${esc(d.file)}</b><span class="muted">· ${p && !p.fatal ? p.total + '행 읽음' : '읽기 실패'}</span><span style="flex:1"></span><button class="tbtn" data-act="attach-csv">다른 파일</button></div>`;
+    prevHTML = `<div class="file-line">${ic('file')}<b>${esc(d.file)}</b><span class="muted">· ${p && !p.fatal ? `${p.total}행 읽음 · 인코딩 ${p.enc}${p.delim && p.delim !== ',' ? ' · 구분 기호 ' + (p.delim === ';' ? '세미콜론' : '탭') : ''}` : '읽기 실패'}</span><span style="flex:1"></span><button class="tbtn" data-act="attach-csv">다른 파일</button></div>`;
+    if (p && !p.fatal && p.enc === 'CP949') prevHTML += `<div class="note y">${ic('warn')}<div>엑셀 기본 「CSV(쉼표로 분리)」 형식(CP949)으로 저장된 파일이라 이 실습판에서는 자동으로 바꿔 읽었습니다. <b>실제 관리 콘솔에서는 한글 이름이 깨질 수 있으니</b> 엑셀 [다른 이름으로 저장]에서 「CSV UTF-8(쉼표로 분리)」를 골라 저장한 뒤 올리세요.</div></div>`;
     if (p.fatal) prevHTML += `<div class="note y">${ic('warn')}<div>${esc(p.fatal)}</div></div>`;
     else {
       const rows = (d.onlyErr ? p.rows.filter(r => r.action === 'fail') : p.rows).slice(0, d.onlyErr ? 50 : 8);
@@ -2056,9 +2078,13 @@ ACT['attach-csv'] = () => { const f = $('#csvFile'); f.value = ''; f.click(); };
 $('#csvFile').addEventListener('change', e => {
   const file = e.target.files && e.target.files[0]; if (!file || !D || D.type !== 'bulk') return;
   if (file.size > 35 * 1024 * 1024) { toast('35 MB보다 큰 파일은 올릴 수 없습니다.', 'no'); return; }
+  if (/\.(xlsx|xlsm|xls|numbers)$/i.test(file.name)) {
+    D.file = file.name; D.prev = { rows: [], counts: { add: 0, update: 0, fail: 0 }, warns: [], total: 0, fatal: '엑셀 통합 문서(.xlsx)는 올릴 수 없습니다. 엑셀에서 [파일 › 다른 이름으로 저장]을 누르고 파일 형식을 「CSV UTF-8(쉼표로 분리)(*.csv)」로 골라 저장한 뒤 올리세요.' };
+    drawDlg(); sig('csv-attached'); return;
+  }
   const fr = new FileReader();
-  fr.onload = () => { if (!D || D.type !== 'bulk') return; D.file = file.name; D.prev = analyzeCsv(fr.result); D.onlyErr = false; drawDlg(); sig('csv-attached'); if (typeof coachCheck === 'function') coachCheck(); };
-  fr.readAsText(file, 'utf-8');
+  fr.onload = () => { if (!D || D.type !== 'bulk') return; const dec = decodeCsvBytes(fr.result); D.file = file.name; D.prev = analyzeCsv(dec.text, dec.enc); D.onlyErr = false; drawDlg(); sig('csv-attached'); if (typeof coachCheck === 'function') coachCheck(); };
+  fr.readAsArrayBuffer(file);
 });
 ACT['attach-last'] = () => {
   if (!S.ui.lastCsv) { toast('먼저 가명 학생 CSV를 받으세요.', 'no'); return; }
@@ -2067,7 +2093,7 @@ ACT['attach-last'] = () => {
 ACT['upload-csv'] = () => {
   const p = D && D.prev; if (!p || p.fatal) return;
   const task = { id: 't' + now(), type: 'bulk_upload', title: '사용자 일괄 업로드', file: D.file, status: 'running', startedAt: now(),
-    summary: { add: 0, update: 0, fail: 0 }, log: [], rows: p.rows };
+    summary: { add: 0, update: 0, fail: 0 }, log: [], rows: p.rows, addedIds: [], updatedIds: [] };
   S.tasks.unshift(task); save();
   closeDlg();
   ACT['open-tasks']();
@@ -2088,6 +2114,7 @@ function applyBulk(id) {
       if (r.password && r.password !== '****') ex.pwd = { mustChange: must, lastReset: now(), value: null };
       if (/^suspended$/i.test(r.newStatus || '')) ex.status = 'suspended'; if (/^active$/i.test(r.newStatus || '')) ex.status = 'active';
       task.summary.update++; task.log.push({ row: r.rowNo, email: r.email, result: '업데이트', msg: '' });
+      (task.updatedIds = task.updatedIds || []).push(ex.id); RECENT.set(ex.id, 'upd');
     } else {
       const local = r.email.split('@')[0];
       const u = mkUser({ local, first: r.first, last: r.last, ou: r.ouId, role: roleForOu(r.ouId), employeeId: r.empId || '', department: r.dept || '',
@@ -2095,6 +2122,7 @@ function applyBulk(id) {
       u.id = 'u_' + local.replace(/[^a-z0-9_]/g, '_'); while (userById(u.id)) u.id += '_';
       S.users.push(u);
       task.summary.add++; task.log.push({ row: r.rowNo, email: r.email, result: '추가', msg: '' });
+      (task.addedIds = task.addedIds || []).push(u.id); RECENT.set(u.id, 'add');
     }
   }
   delete task.rows;
@@ -2105,8 +2133,24 @@ function applyBulk(id) {
   renderTaskBadge();
   toast(`사용자 일괄 업로드 완료 — 추가 ${task.summary.add} · 업데이트 ${task.summary.update} · 실패 ${task.summary.fail}. 처리 결과를 이메일로 보냈습니다(모의).`, task.summary.fail ? 'no' : 'ok');
   sig('bulk-done', task.id);
-  if (ROUTE.key === 'users') refreshUsersTable(); else if (ROUTE.key === 'ous' || ROUTE.key === 'home') rerenderMain();
+  if (ROUTE.key === 'users') {
+    /* 방금 반영한 사용자를 목록 맨 위에 보여 준다. 지금 거르는 조직 단위 밖이면 거르기를 푼다 */
+    const ids = (task.addedIds || []).concat(task.updatedIds || []);
+    S.ui.usersNewFirst = true; S.ui.usersPage = 0;
+    if (S.ui.usersOu && ids.length && !ids.some(id => ouDesc(S.ui.usersOu).includes((userById(id) || {}).ou))) S.ui.usersOu = null;
+    save(); rerenderMain();
+  } else if (ROUTE.key === 'ous' || ROUTE.key === 'home') rerenderMain();
 }
+ACT['task-view'] = el => {
+  const t = S.tasks.find(x => x.id === el.getAttribute('data-task')); if (!t) return;
+  const ids = (t.addedIds || []).concat(t.updatedIds || []);
+  ids.forEach(id => { if (!RECENT.has(id)) RECENT.set(id, (t.addedIds || []).includes(id) ? 'add' : 'upd'); });
+  const ous = [...new Set(ids.map(id => (userById(id) || {}).ou).filter(Boolean))];
+  $('#tasksDrawer').hidden = true;
+  Object.assign(S.ui, { usersOu: ous.length === 1 ? ous[0] : null, usersQ: '', usersStatus: '', usersPage: 0, usersNewFirst: true }); save();
+  if (ROUTE.key === 'users') rerenderMain(); else go('users');
+  toast(`업로드로 반영한 사용자 ${ids.length}명을 목록 맨 위에 표시했습니다.`);
+};
 ACT['dl-log'] = el => {
   const t = S.tasks.find(x => x.id === el.getAttribute('data-task')); if (!t) return;
   download(`일괄업로드_로그_${ymd(t.startedAt)}.csv`, csvText([['행', '이메일', '결과', '메시지']].concat(t.log.map(l => [l.row, l.email, l.result, l.msg]))));
@@ -2325,7 +2369,7 @@ PAGES['chrome-settings'] = {
   },
   after() {
     const s = $('#chromeSettingSearch');
-    if (s) s.addEventListener('input', () => { C_Q = s.value; const pos = s.selectionStart; rerenderMain(); const s2 = $('#chromeSettingSearch'); s2.focus(); try { s2.setSelectionRange(pos, pos); } catch (e) {} sig('chrome-search', C_Q); });
+    if (s) s.addEventListener('input', () => { C_Q = s.value; const pos = s.selectionStart; rerenderMain(); const s2 = $('#chromeSettingSearch'); s2.focus({ preventScroll: true });   /* 다시 그린 뒤 커서만 돌려놓는다(따라하기가 굴려 둔 화면 위치를 되돌리지 않게) */ try { s2.setSelectionRange(pos, pos); } catch (e) {} sig('chrome-search', C_Q); });
   }
 };
 ACT['chrome-tab'] = el => { S.ui.chromeTab = el.getAttribute('data-tab'); save(); rerenderMain(); sig('chrome-tab', S.ui.chromeTab); };
@@ -2896,7 +2940,7 @@ const MISSIONS = [
     pre: () => { const u = userById('u_s10107'); return u && u.status !== 'deleted' ? '' : '안건우(s10107) 학생이 삭제되어 있습니다. 최근 삭제된 사용자에서 복원하거나 [처음 상태로]를 누르세요.'; },
     check: () => { const u = userById('u_s10107'); return !!(u && u.pwd.lastReset); },
     steps: [
-      { sel: '#topSearch', t: '맨 위 검색창에 「안건우」 입력', d: '이름·이메일·학번 어느 것으로 찾아도 됩니다. 많은 학생 중 한 명은 검색이 가장 빠릅니다.', done: () => /안건우|s10107/.test($('#topSearch').value) || (ROUTE.key === 'user' && ROUTE.param === 'u_s10107'), auto: { type: '안건우' } },
+      { sel: ['#topSearch', '#searchOpen'], t: '맨 위 검색창에 「안건우」 입력', d: '이름·이메일·학번 어느 것으로 찾아도 됩니다. 많은 학생 중 한 명은 검색이 가장 빠릅니다.', done: () => /안건우|s10107/.test($('#topSearch').value) || (ROUTE.key === 'user' && ROUTE.param === 'u_s10107'), auto: { type: '안건우' } },
       { sel: ['#topResults [data-user="u_s10107"]', '#topSearch'], t: '검색 결과에서 안건우 누르기', d: '사용자 세부정보 화면이 열립니다.', done: () => ROUTE.key === 'user' && ROUTE.param === 'u_s10107', setsPg: true },
       { sel: '#main .uacts [data-act="reset-pw"]', t: '왼쪽 「비밀번호 재설정」 누르기', d: '이름 아래 작업 목록 맨 위에 있습니다.', done: () => dlgIs('resetPw') },
       { in: 'resetPw', sel: '#dlgResetPw [data-bind="D.pwMode"][value="auto"]', t: '「비밀번호 자동 생성」 고르기', d: '추측하기 어려운 비밀번호가 만들어지고, 학생은 다음 로그인 때 바꾸게 됩니다.', done: () => D.pwMode === 'auto' },
@@ -3027,7 +3071,7 @@ const MISSIONS = [
       { in: 'bulk', sel: '[data-act="dl-fake-csv"]', t: '「가명 학생 CSV 받기」', d: '', done: () => !!(S.ui.lastCsv && S.ui.lastCsv.mix) },
       { in: 'bulk', sel: ['[data-act="attach-last"]', '[data-act="attach-csv"]'], t: '「CSV 파일 첨부」', d: '', done: () => !!(D.prev && D.prev.counts.fail >= 2) },
       { in: 'bulk', out: true, sel: '[data-act="upload-csv"]', t: '「업로드」 누르기', d: '오류 행이 있어도 업로드는 진행되고, 오류 행만 실패합니다(실물과 같음).', done: g => S.tasks.some(t => t.startedAt >= g.t0) },
-      { sel: '[data-act="dl-log"]', t: '「로그 다운로드」', d: '잠시 뒤 「완료」가 뜨면 로그를 받습니다. 행 번호대로 파일을 고쳐 다시 올리는 것이 실물 절차입니다.', done: () => !!S.flags.b2, before: () => { if ($('#tasksDrawer').hidden) ACT['open-tasks'](); } }
+      { sel: () => { const t = S.tasks.find(x => x.startedAt >= GD.t0); return t ? [`[data-act="dl-log"][data-task="${t.id}"]`, `.task[data-task="${t.id}"]`] : '[data-act="open-tasks"]'; }, t: '「로그 다운로드」', d: '잠시 뒤 「완료」가 뜨면 로그를 받습니다. 행 번호대로 파일을 고쳐 다시 올리는 것이 실물 절차입니다.', done: () => !!S.flags.b2, before: () => { if ($('#tasksDrawer').hidden) ACT['open-tasks'](); } }
     ] },
   { id: 'b3', bonus: true, n: '로그인 제한(학교 계정만)', min: 3, d: '학생 크롬북에 개인 계정으로 로그인해 학교 필터를 피하지 못하게, 학교 도메인 계정만 로그인하도록 제한합니다.',
     check: () => { const c = stuLocal('login') || {}; return c.mode === 'list' && /@dtutor\.example/.test(c.allowed || ''); },
@@ -3171,7 +3215,9 @@ function coachStart(id) {
   if (id === 'm2') $('#topSearch').value = '';
   if (typeof C_Q !== 'undefined') { C_Q = ''; S.ui.chromeTab = 'users'; }
   if (id === 'm10') { S.ui.storageKind = 'ou'; }
-  if (innerWidth < 1280) { S.ui.mpOpen = false; }
+  /* 미션 패널은 화면 오른쪽 340px을 덮어 「옵션 더보기」·「앱 설치」·「재정의」 같은 단추를 누를 수 없게 한다 → 너비와 관계없이 접는다 */
+  S.ui.mpOpen = false;
+  document.body.classList.add('guiding');
   save();
   toast(`${note}「${m.n}」 따라하기를 시작합니다. 노랗게 반짝이는 곳을 누르세요.`);
   if (ROUTE.key === 'users') rerenderMain(); else renderMp();
@@ -3179,6 +3225,7 @@ function coachStart(id) {
 }
 function coachStop(silent) {
   GD = null; COACH_PIN = null;
+  document.body.classList.remove('guiding');
   $$('.gd-hl').forEach(e => e.classList.remove('gd-hl'));
   $('#guideBar').hidden = true;
   if (!silent) { renderMp(); if (ROUTE.key === 'users') refreshUsersTable(); }
@@ -3239,7 +3286,8 @@ function visible(el) {
 }
 function coachTarget(st) {
   if (st.go && !st.sel) { expandNavFor(st.go); if (document.body.classList.contains('nav-mini')) document.body.classList.remove('nav-mini'); return $(`#nav [data-go="${st.go}"]`); }
-  const sels = Array.isArray(st.sel) ? st.sel : [st.sel];
+  const sel = typeof st.sel === 'function' ? st.sel() : st.sel;
+  const sels = Array.isArray(sel) ? sel : [sel];
   for (const s of sels) {
     const el = $$(s).find(e => visible(e) || (e.type === 'radio' || e.type === 'checkbox') && visible(e.closest('label')));
     if (el) return (el.type === 'radio' || el.type === 'checkbox') && el.closest('label') ? el.closest('label') : el;
@@ -3272,7 +3320,13 @@ function coachPaint() {
   bar.hidden = false;
   bar.classList.remove('top');
   gbPlace();
-  if (S.ui.gbPos) return;   /* 끌어서 옮긴 자리는 그대로 둔다 */
+  if (S.ui.gbPos) {   /* 끌어서 옮긴 자리는 그대로 두되, 반짝이는 곳을 덮으면 이번 단계만 위나 아래로 비켜 준다(저장하지 않음) */
+    if (tgt && !GB_DRAG) {
+      const r = tgt.getBoundingClientRect(), b = bar.getBoundingClientRect();
+      if (!(r.right < b.left || r.left > b.right || r.bottom < b.top || r.top > b.bottom)) bar.style.top = (r.top > innerHeight / 2 ? 76 : Math.max(76, innerHeight - bar.offsetHeight - 12)) + 'px';
+    }
+    return;
+  }
   if (tgt) {
     const r = tgt.getBoundingClientRect(), b = bar.getBoundingClientRect();
     if (!(r.right < b.left || r.left > b.right || r.bottom < b.top || r.top > b.bottom)) bar.classList.add('top');
@@ -3393,6 +3447,19 @@ async function coachStepOnce() {
   for (let k = 0; k < 40; k++) { await tick(); coachCheck(); if (!GD || GD.i !== before) break; await sleep(100); }
   return { active: !!GD, before, after: GD ? GD.i : -1 };
 }
+/* 사람처럼 누르는 검사용: 지금 반짝이는 곳의 화면 좌표와 가려졌는지 */
+function coachTargetInfo() {
+  if (!GD) return { active: false };
+  const m = MISSIONS.find(x => x.id === GD.id), st = m.steps[GD.i], t = coachTarget(st);
+  const base = { active: true, id: GD.id, i: GD.i, n: m.steps.length, t: st.t, auto: st.auto || null, fail: GD.fail || '' };
+  if (!t) return Object.assign(base, { none: true });
+  const r = t.getBoundingClientRect();
+  const x = Math.round(r.left + Math.min(r.width / 2, 60)), y = Math.round(r.top + Math.min(r.height / 2, 18));
+  const hit = document.elementFromPoint(x, y);
+  const desc = e => e ? (e.id ? '#' + e.id : '') + (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/).slice(0, 2).join('.') : '') + ' ' + (e.textContent || '').trim().slice(0, 30) : 'null';
+  let cover = null; if (hit && !t.contains(hit)) { let c = hit; while (c && c.parentElement && !['MP', 'GUIDEBAR', 'MPFAB', 'TOAST', 'TASKSDRAWER', 'DLGROOT', 'POPROOT', 'NAV', 'TOPBAR'].includes((c.id || '').toUpperCase())) c = c.parentElement; cover = desc(c && c.id ? c : hit); }
+  return Object.assign(base, { x, y, tag: t.tagName, inView: x >= 0 && y >= 0 && x <= innerWidth && y <= innerHeight, covered: !!cover, cover, target: desc(t) });
+}
 function coachInfo() { if (!GD) return { active: false }; const m = MISSIONS.find(x => x.id === GD.id), st = m.steps[GD.i]; coachPaint(); return { active: true, id: GD.id, i: GD.i, n: m.steps.length, t: st.t }; }
 async function runAll(ids = ['m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9', 'm10', 'b1', 'b2', 'b3']) {
   NO_DL = true; window.__res = [];
@@ -3400,7 +3467,7 @@ async function runAll(ids = ['m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9
   NO_DL = false;
   return window.__res;
 }
-window.AdminSim = { coachStart, coachStop, coachStepOnce, coachInfo, get S() { return S; }, get D() { return D; }, get GD() { return GD; }, get CD() { return CD; }, get SD() { return SD; }, get ROUTE() { return ROUTE; }, save, reset: resetAll, go, MISSIONS, runMission, runAll, analyzeCsv, makeFakeCsv, effStorageLimit, setNoDownload: v => { NO_DL = !!v; } };
+window.AdminSim = { coachStart, coachStop, coachStepOnce, coachInfo, coachTargetInfo, get S() { return S; }, get D() { return D; }, get GD() { return GD; }, get CD() { return CD; }, get SD() { return SD; }, get ROUTE() { return ROUTE; }, save, reset: resetAll, go, MISSIONS, runMission, runAll, analyzeCsv, makeFakeCsv, effStorageLimit, setNoDownload: v => { NO_DL = !!v; } };
 
 /* ============ 시작 ============ */
 (function boot() {
