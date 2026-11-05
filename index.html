@@ -377,12 +377,12 @@ td.c-acts{padding:0 !important}
 .dlg p{margin:0 0 12px;line-height:21px}
 /* 단계식(일괄 업데이트) */
 .vsteps{position:relative}
-.vstep{display:grid;grid-template-columns:28px 1fr;gap:10px;padding-bottom:22px;position:relative}
+.vstep{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;padding-bottom:22px;position:relative}
 .vstep::before{content:"";position:absolute;left:11px;top:26px;bottom:2px;width:2px;background:#dadce0}
 .vstep:last-child::before{display:none}
 .vstep .n{width:24px;height:24px;border-radius:50%;background:var(--classic);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:500}
 .vstep .st{font-weight:500;margin:2px 0 10px}
-.extbl{border-collapse:collapse;font-size:12px;margin:8px 0}
+.extbl{border-collapse:collapse;font-size:12px;margin:8px 0;display:block;max-width:100%;overflow-x:auto}
 .extbl td,.extbl th{border:1px solid #dadce0;padding:4px 10px;text-align:left}
 .extbl th{background:#f1f3f4;font-weight:400;color:var(--muted);text-align:center}
 /* 전체 화면 페이지(새 사용자 추가) */
@@ -876,7 +876,7 @@ function gradeOfOu(ou) { const o = ouById(ou); if (!o) return null; const m = /^
 function freeStudentNos(grade, count, reserved = new Set()) {
   const used = new Set(S.users.map(u => u.email.split('@')[0]));
   const out = [];
-  for (let ban = 1; ban <= 4 && out.length < count; ban++) {
+  for (let ban = 1; ban <= 99 && out.length < count; ban++) {
     for (let no = 1; no <= 30 && out.length < count; no++) {
       const num = `${grade}${pad(ban)}${pad(no)}`;
       if (!used.has('s' + num) && !reserved.has(num)) out.push(num);
@@ -1535,7 +1535,7 @@ ACT['bulk-suspend'] = () => { let n = 0; for (const id of SEL) { const u = userB
 ACT['bulk-group'] = el => groupPop(el, [...SEL]);
 ACT['add-group'] = el => groupPop(el, [el.getAttribute('data-user')]);
 function groupPop(el, uids) {
-  popMenu(el, `<div class="ph2">그룹에 추가</div>${S.groups.map(g => `<button class="mi" data-act="group-add-pick" data-group="${g.id}" data-uids="${uids.join(',')}">${esc(g.name)}<span class="small muted" style="margin-left:auto">${g.members.length}명</span></button>`).join('')}`);
+  popMenu(el, `<div class="ph2">그룹에 추가</div>${S.groups.map(g => `<button class="mi" data-act="group-add-pick" data-group="${g.id}" data-uids="${uids.join(',')}">${esc(g.name)}<span class="small muted" style="margin-left:auto">${g.members.filter(id => userById(id) && userById(id).status !== 'deleted').length}명</span></button>`).join('')}`);
 }
 ACT['group-add-pick'] = el => {
   const g = S.groups.find(x => x.id === el.getAttribute('data-group')); const ids = el.getAttribute('data-uids').split(',').filter(Boolean);
@@ -1813,7 +1813,7 @@ DLG.pwDone = d => {
   return { title: `비밀번호 재설정됨:\n${esc(uName(u))}`, id: 'dlgPwDone', noX: true,
     body: `<div class="small muted" style="margin-bottom:6px">${esc(u.email)}의 새 비밀번호</div>
       <div class="pw-box"><span>${d.show ? esc(d.pw) : '●'.repeat(Math.min(16, d.pw.length))}</span><button class="ic-btn sm" data-act="pw-eye" aria-label="비밀번호 표시">${ic('eye', 'sm')}</button><button class="tbtn" data-act="copy-pw">${ic('copy', 'sm')}비밀번호 복사</button></div>
-      <p class="small muted" style="margin-top:8px">사용자가 다음에 로그인하면 비밀번호를 바꾸게 됩니다. 이 창을 닫으면 비밀번호를 다시 볼 수 없습니다.</p>
+      <p class="small muted" style="margin-top:8px">${u.pwd.mustChange ? '사용자가 다음에 로그인하면 비밀번호를 바꾸게 됩니다. ' : ''}이 창을 닫으면 비밀번호를 다시 볼 수 없습니다.</p>
       <button class="tbtn" style="padding-left:0" data-act="mail-mock">${ic('mail', 'sm')}이메일로 비밀번호 보내기</button>`,
     foot: `<button class="btn btn-text" data-act="done-reset">완료</button>`
   };
@@ -1841,7 +1841,7 @@ DLG.moveOu = d => ({ title: d.uids.length > 1 ? `조직 단위 변경:\n사용�
 PICK.moveou = id => { D.ou = id; drawDlg(); sig('ou-pick', id); };
 ACT['submit-move'] = () => {
   for (const id of D.uids) { const u = userById(id); u.ou = D.ou; if (u.role !== 'admin') u.role = roleForOu(D.ou); audit('ou_move', u.email, '→ ' + ouPath(D.ou)); }
-  const n = D.uids.length; save(); closeDlg(); SEL.clear(); toast(`${n}명을 ${ouPath(D.ou)}(으)로 옮겼습니다.`); rerenderMain();
+  const n = D.uids.length, to = D.ou; save(); closeDlg(); SEL.clear(); toast(`${n}명을 ${ouPath(to)}(으)로 옮겼습니다.`); rerenderMain();
 };
 
 /* ============ 사용자 삭제 (실물: 보관처리 권유 → 데이터 이전 → 삭제) ============ */
@@ -2218,7 +2218,7 @@ ACT['ou-delete'] = () => {
   if (ouCount(o.id) || S.users.some(u => u.ou === o.id)) { toast('사용자가 있는 조직 단위는 삭제할 수 없습니다. 먼저 사용자를 옮기세요.', 'no'); return; }
   if (ouKids(o.id).length) { toast('하위 조직 단위가 있으면 삭제할 수 없습니다.', 'no'); return; }
   confirmDlg('조직 단위 삭제', `<p>「${esc(ouPath(o.id))}」 조직 단위를 삭제할까요? 이 조직 단위에 걸어 둔 설정도 함께 사라집니다.</p>`, '삭제', () => {
-    S.ous = S.ous.filter(x => x.id !== o.id); delete S.chrome.byOu[o.id]; delete S.storage.byOu[o.id];
+    S.ous = S.ous.filter(x => x.id !== o.id); delete S.chrome.byOu[o.id]; delete S.storage.byOu[o.id]; if (S.ui.usersOu === o.id) S.ui.usersOu = null; if (MK_OU === o.id) MK_OU = null;
     audit('ou_delete', ouPath(o.parent) + '/' + o.name); OU_SEL = o.parent; save(); toast('조직 단위를 삭제했습니다.', 'ok'); rerenderMain();
   });
 };
@@ -3471,7 +3471,7 @@ window.AdminSim = { coachStart, coachStop, coachStepOnce, coachInfo, coachTarget
 
 /* ============ 시작 ============ */
 (function boot() {
-  const fresh = !localStorage.getItem(KEY);
+  let fresh = true; try { fresh = !localStorage.getItem(KEY); } catch (e) {}
   load();
   if (fresh && innerWidth < 1280) S.ui.mpOpen = false;
   try { if (sessionStorage.getItem('gadmin_banner_off')) $('#safeBanner').hidden = true; } catch (e) {}
